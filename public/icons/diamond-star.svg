@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <linearGradient id="diamondGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="35%" stop-color="#a5f3fc" />
+      <stop offset="70%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <filter id="starGlow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="2" result="glow" />
+      <feComposite in="SourceGraphic" in2="glow" operator="over" />
+    </filter>
+  </defs>
+  <!-- 8-Point Diamond Star -->
+  <polygon points="24,4 28,18 42,20 31,29 35,43 24,34 13,43 17,29 6,20 20,18" fill="url(#diamondGrad)" stroke="#0369a1" stroke-width="1.2" filter="url(#starGlow)" />
+  <!-- Inner Facets -->
+  <polygon points="24,10 27,20 36,22 29,28 31,37 24,31 17,37 19,28 12,22 21,20" fill="#ffffff" opacity="0.6" />
+  <circle cx="24" cy="24" r="3" fill="#ffffff" />
+</svg>

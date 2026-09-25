@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="celestialGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="30%" stop-color="#6EE7B7" />
+      <stop offset="70%" stop-color="#06B6D4" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+    <filter id="starGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="#021319" stroke="url(#celestialGrad)" stroke-width="2" />
+  <!-- 8-Pointed Celestial Nova Star -->
+  <polygon points="32,6 36,25 55,20 40,32 55,44 36,39 32,58 28,39 9,44 24,32 9,20 28,25" fill="url(#celestialGrad)" filter="url(#starGlow)" />
+  <circle cx="32" cy="32" r="7" fill="#FFFFFF" />
+  <circle cx="32" cy="32" r="3" fill="#10B981" />
+</svg>

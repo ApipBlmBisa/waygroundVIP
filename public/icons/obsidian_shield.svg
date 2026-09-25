@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="obsidianGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="50%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+    <linearGradient id="shieldGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#78350F" />
+    </linearGradient>
+    <filter id="shieldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="#090A0F" stroke="url(#shieldGold)" stroke-width="2" />
+  <!-- Shield Outline -->
+  <path d="M32 12L48 18V32C48 42.5 41.2 49.5 32 53C22.8 49.5 16 42.5 16 32V18L32 12Z" fill="url(#obsidianGrad)" stroke="url(#shieldGold)" stroke-width="2.5" filter="url(#shieldGlow)" />
+  <!-- Shield Inner Star / Crest -->
+  <path d="M32 18L44 23V32C44 40 38.8 45.6 32 48.5C25.2 45.6 20 40 20 32V23L32 18Z" fill="#020617" opacity="0.85" />
+  <polygon points="32,23 35,30 42,32 35,34 32,41 29,34 22,32 29,30" fill="url(#shieldGold)" />
+  <circle cx="32" cy="32" r="3" fill="#38BDF8" />
+</svg>

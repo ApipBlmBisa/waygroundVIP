@@ -1,0 +1,6 @@
+{
+  "name": "Wayground Flashcard Kuis",
+  "description": "Aplikasi Flashcard Kuis interaktif bergaya modern Quizizz & Wayground dengan profil username unik, mode Tryout Solo & PvP Multiplayer online real-time, riwayat statistik individu terpisah, leaderboard global publik, sistem proteksi kata sandi web, dan parser Excel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
