@@ -41,8 +41,12 @@ export async function parseExcelQuizFile(file: File): Promise<FlashcardQuestion[
 
   const cleanOptionText = (text: string): string => {
     if (!text) return '';
-    // Strip leading "A. ", "B. ", "A) ", "(A) ", "A - ", "a. ", "1. " etc. so shuffled options display cleanly
-    return text.replace(/^(\s*(\(|\[)?[A-Da-d1-4](\)|\.|\:|\-|\s)\s*)+/, '').trim() || text.trim();
+    // Strip leading "A. ", "B. ", "A) ", "(A) ", "A - " etc. so shuffled options display cleanly.
+    // Only strips a bare letter A-D (optionally wrapped in ( ) or [ ]) followed by ) . : or -
+    // Requires a delimiter character (not just whitespace) so real answer text that happens to
+    // start with a number/letter (e.g. "2 Hijriah", "4 harakat", "1 : 1") is left untouched.
+    const cleaned = text.replace(/^\s*(\(|\[)?[A-Da-d](\)|\.|\:|\-)\s*/, '').trim();
+    return cleaned || text.trim();
   };
 
   rawRows.forEach((row, index) => {
