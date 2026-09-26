@@ -109,11 +109,21 @@ interface PvPRoom {
   createdAt: number;
 }
 
+interface SavedQuizData {
+  id: string;
+  title: string;
+  fileName: string;
+  uploadedAt: string;
+  questionsCount: number;
+  questions: any[];
+}
+
 // Database Structure
 interface Database {
   users: Record<string, UserProfile>;
   tryoutHistory: TryoutHistoryItem[];
   pvpHistory: PvPHistoryItem[];
+  savedQuizzes: SavedQuizData[];
 }
 
 // Default Seed Data
@@ -314,6 +324,47 @@ function saveDatabase(db: Database) {
 // Placeholder until loadDatabase() resolves inside start(); routes below
 // close over this `let` binding, so reassigning it later is visible to them.
 let db: Database = defaultDb;
+db.savedQuizzes = Array.isArray(db.savedQuizzes) ? db.savedQuizzes : [];
+
+app.get('/api/saved-quizzes', (_req, res) => {
+  res.json(db.savedQuizzes);
+});
+
+app.post('/api/saved-quizzes', (req, res) => {
+  try {
+    const quiz = req.body;
+
+    if (!quiz || !quiz.title || !Array.isArray(quiz.questions) || quiz.questions.length === 0) {
+      return res.status(400).json({ error: 'Data kuis tidak valid.' });
+    }
+
+    const savedQuiz = {
+      id: quiz.id || `quiz-${Date.now()}`,
+      title: String(quiz.title),
+      fileName: String(quiz.fileName || ''),
+      uploadedAt: quiz.uploadedAt || new Date().toISOString(),
+      questionsCount: Number(quiz.questionsCount) || quiz.questions.length,
+      questions: quiz.questions,
+    };
+
+    db.savedQuizzes = [
+      savedQuiz,
+      ...db.savedQuizzes.filter(q => q.id !== savedQuiz.id && q.title !== savedQuiz.title)
+    ].slice(0, 50);
+
+    saveDatabase(db);
+    return res.json(savedQuiz);
+  } catch (err) {
+    console.error('Failed to save shared quiz:', err);
+    return res.status(500).json({ error: 'Gagal menyimpan kuis.' });
+  }
+});
+
+app.delete('/api/saved-quizzes/:id', (req, res) => {
+  db.savedQuizzes = db.savedQuizzes.filter(q => q.id !== req.params.id);
+  saveDatabase(db);
+  res.json({ success: true });
+});
 
 // In-Memory PvP Rooms & Client Sockets
 const activeRooms = new Map<string, PvPRoom>();

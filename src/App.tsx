@@ -75,6 +75,18 @@ export default function App() {
   // Global Settings & History
   const [settings, setSettings] = useState<QuizSettings>(() => loadStoredSettings());
   const [savedQuizzes, setSavedQuizzes] = useState<SavedQuiz[]>(() => loadSavedQuizzes());
+
+  useEffect(() => {
+    fetch('/api/saved-quizzes')
+      .then(res => res.ok ? res.json() : [])
+      .then((shared: SavedQuiz[]) => {
+        if (Array.isArray(shared)) {
+          setSavedQuizzes(shared);
+          localStorage.setItem('wayground_saved_quizzes_v1', JSON.stringify(shared));
+        }
+      })
+      .catch(err => console.error('Failed to load shared quizzes:', err));
+  }, []);
   const [showThemeModal, setShowThemeModal] = useState<boolean>(false);
 
   // Quiz Play State
@@ -214,6 +226,30 @@ export default function App() {
       questions: newQuestions,
     });
     setSavedQuizzes(saved);
+
+    fetch('/api/saved-quizzes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: `quiz-${Date.now()}`,
+        title,
+        fileName,
+        uploadedAt: new Date().toISOString(),
+        questionsCount: newQuestions.length,
+        questions: newQuestions,
+      }),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Gagal menyimpan kuis bersama');
+        return res.json();
+      })
+      .then((sharedQuiz: SavedQuiz) => {
+        setSavedQuizzes(prev => [
+          sharedQuiz,
+          ...prev.filter(q => q.id !== sharedQuiz.id && q.title !== sharedQuiz.title)
+        ]);
+      })
+      .catch(err => console.error('Failed to save shared quiz:', err));
   };
 
   const handleDeleteSavedQuiz = (id: string) => {
