@@ -316,6 +316,49 @@ function saveDatabase(db: Database) {
 // close over this `let` binding, so reassigning it later is visible to them.
 let db: Database = defaultDb;
 
+// Shared quiz API
+app.get('/api/saved-quizzes', (_req, res) => {
+  res.json(db.savedQuizzes || []);
+});
+
+app.post('/api/saved-quizzes', async (req, res) => {
+  try {
+    const savedQuiz = req.body;
+
+    if (!savedQuiz?.id || !savedQuiz?.title || !Array.isArray(savedQuiz?.questions)) {
+      return res.status(400).json({ error: 'Invalid quiz data' });
+    }
+
+    db.savedQuizzes = [
+      savedQuiz,
+      ...(db.savedQuizzes || []).filter(
+        (q: any) => q.id !== savedQuiz.id && q.title !== savedQuiz.title
+      )
+    ].slice(0, 50);
+
+    await saveDatabase(db);
+    res.json(savedQuiz);
+  } catch (error) {
+    console.error('Failed to save shared quiz:', error);
+    res.status(500).json({ error: 'Failed to save quiz' });
+  }
+});
+
+app.delete('/api/saved-quizzes/:id', async (req, res) => {
+  try {
+    db.savedQuizzes = (db.savedQuizzes || []).filter(
+      (q: any) => q.id !== req.params.id
+    );
+
+    await saveDatabase(db);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Failed to delete shared quiz:', error);
+    res.status(500).json({ error: 'Failed to delete quiz' });
+  }
+});
+
+
 // In-Memory PvP Rooms & Client Sockets
 const activeRooms = new Map<string, PvPRoom>();
 const clientRooms = new Map<WebSocket, { username: string; roomCode: string | null }>();
