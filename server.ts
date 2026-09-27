@@ -18,8 +18,10 @@ if (!fs.existsSync(CUSTOM_BADGES_DIR)) {
 }
 app.use('/custom-badges', express.static(CUSTOM_BADGES_DIR));
 
-// Ensure data directory exists
-const DATA_DIR = path.join(process.cwd(), 'data');
+// Local database file is only a fallback when Supabase is unavailable.
+const DATA_DIR = process.env.NODE_ENV === 'production'
+  ? '/tmp/wayground-data'
+  : path.join(process.cwd(), 'data');
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
