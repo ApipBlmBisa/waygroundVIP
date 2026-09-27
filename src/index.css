@@ -10,6 +10,13 @@
 }
 
 @layer base {
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+    min-height: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: -0.01em;
@@ -131,7 +138,7 @@
   animation: pulseGlow 2s ease-in-out infinite;
 }
 
-/* Owner Name Exclusive Animations */
+/* Owner & VIP Name Exclusive Animations */
 @keyframes ownerShimmer {
   0% {
     background-position: 0% 50%;
@@ -145,32 +152,295 @@
 }
 
 .animate-owner-shimmer {
-  background-size: 250% 250% !important;
-  animation: ownerShimmer 3s ease infinite !important;
+  background-size: 220% 220% !important;
+  animation: ownerShimmer 3.5s ease-in-out infinite !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
 }
 
 @keyframes ownerNeonPulse {
   0%, 100% {
-    filter: drop-shadow(0 0 3px var(--owner-glow-color, rgba(251, 191, 36, 0.7))) drop-shadow(0 0 8px var(--owner-glow-color, rgba(251, 191, 36, 0.4)));
+    opacity: 0.95;
+    filter: brightness(1);
+    transform: scale(1);
   }
   50% {
-    filter: drop-shadow(0 0 10px var(--owner-glow-color, rgba(251, 191, 36, 0.95))) drop-shadow(0 0 18px var(--owner-glow-color, rgba(251, 191, 36, 0.6)));
+    opacity: 1;
+    filter: brightness(1.2) drop-shadow(0 0 6px var(--owner-glow-color, rgba(251, 191, 36, 0.7)));
+    transform: scale(1.015);
   }
 }
 
 .animate-owner-neon {
-  animation: ownerNeonPulse 2s ease-in-out infinite !important;
+  animation: ownerNeonPulse 2.2s ease-in-out infinite !important;
+  will-change: filter, transform;
 }
 
 @keyframes ownerPulseWave {
   0%, 100% {
-    transform: translateY(0) scale(1);
+    transform: scale(1);
   }
   50% {
-    transform: translateY(-2px) scale(1.025);
+    transform: scale(1.025);
   }
 }
 
 .animate-owner-pulse-wave {
-  animation: ownerPulseWave 2.4s ease-in-out infinite !important;
+  animation: ownerPulseWave 2.2s ease-in-out infinite !important;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@keyframes ownerFlameFlicker {
+  0%, 100% {
+    opacity: 0.95;
+    filter: brightness(1);
+    transform: translateY(0);
+  }
+  25% {
+    opacity: 1;
+    filter: brightness(1.2) drop-shadow(0 0 5px rgba(249, 115, 22, 0.7));
+    transform: translateY(-0.5px);
+  }
+  50% {
+    opacity: 0.9;
+    filter: brightness(1.05);
+    transform: translateY(0.5px);
+  }
+  75% {
+    opacity: 1;
+    filter: brightness(1.25) drop-shadow(0 0 7px rgba(239, 68, 68, 0.8));
+    transform: translateY(-0.5px);
+  }
+}
+
+.animate-owner-flame-flicker {
+  animation: ownerFlameFlicker 1.8s ease-in-out infinite !important;
+  will-change: transform, filter;
+}
+
+@keyframes ownerGlitch {
+  0%, 100% {
+    transform: translate(0);
+    opacity: 1;
+  }
+  20% {
+    transform: translate(-1px, 0.5px);
+    opacity: 0.92;
+  }
+  40% {
+    transform: translate(1px, -0.5px);
+    opacity: 1;
+  }
+  60% {
+    transform: translate(-0.5px, -0.5px);
+    opacity: 0.95;
+  }
+  80% {
+    transform: translate(0.5px, 0.5px);
+    opacity: 1;
+  }
+}
+
+.animate-owner-glitch {
+  animation: ownerGlitch 3s infinite steps(2, start) !important;
+  will-change: transform;
+}
+
+@keyframes ownerAuroraFlow {
+  0% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  50% {
+    filter: hue-rotate(85deg) brightness(1.15);
+  }
+  100% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
+}
+
+.animate-owner-aurora-flow {
+  animation: ownerAuroraFlow 4.5s ease-in-out infinite !important;
+  will-change: filter;
+}
+
+@keyframes ownerCosmicSparkle {
+  0%, 100% {
+    opacity: 0.92;
+    filter: brightness(1);
+  }
+  20% {
+    opacity: 1;
+    filter: brightness(1.35) drop-shadow(0 0 6px rgba(255, 255, 255, 0.85));
+  }
+  40% {
+    opacity: 0.92;
+    filter: brightness(1.05);
+  }
+  60% {
+    opacity: 1;
+    filter: brightness(1.4) drop-shadow(0 0 8px rgba(168, 85, 247, 0.85));
+  }
+  80% {
+    opacity: 0.95;
+    filter: brightness(1.1);
+  }
+}
+
+.animate-owner-cosmic-sparkle {
+  animation: ownerCosmicSparkle 2.6s ease-in-out infinite !important;
+  will-change: filter;
+}
+
+@keyframes ownerElectricSpark {
+  0%, 100% {
+    filter: brightness(1);
+    transform: skewX(0deg);
+  }
+  15% {
+    filter: brightness(1.4) drop-shadow(0 0 6px rgba(34, 211, 238, 0.9));
+    transform: skewX(-0.5deg);
+  }
+  18% {
+    filter: brightness(1);
+    transform: skewX(0deg);
+  }
+  60% {
+    filter: brightness(1.5) drop-shadow(0 0 8px rgba(56, 189, 248, 1));
+    transform: skewX(0.5deg);
+  }
+  64% {
+    filter: brightness(1.1);
+    transform: skewX(0deg);
+  }
+}
+
+.animate-owner-electric-spark {
+  animation: ownerElectricSpark 2.2s ease-in-out infinite !important;
+  will-change: filter, transform;
+}
+
+@keyframes ownerRainbowCycle {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+.animate-owner-rainbow-cycle {
+  animation: ownerRainbowCycle 6s linear infinite !important;
+  will-change: filter;
+}
+
+@keyframes ownerFloatingLevitate {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2.5px);
+  }
+}
+
+.animate-owner-floating-levitate {
+  animation: ownerFloatingLevitate 2.8s ease-in-out infinite !important;
+  will-change: transform;
+}
+
+@keyframes ownerHeartbeatPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.05);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.06);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+.animate-owner-heartbeat-pulse {
+  animation: ownerHeartbeatPulse 1.8s ease-in-out infinite !important;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@keyframes ownerNeonBreathe {
+  0%, 100% {
+    filter: brightness(0.92) drop-shadow(0 0 2px var(--owner-glow-color, rgba(251, 191, 36, 0.4)));
+  }
+  50% {
+    filter: brightness(1.3) drop-shadow(0 0 10px var(--owner-glow-color, rgba(251, 191, 36, 0.95)));
+  }
+}
+
+.animate-owner-neon-breathe {
+  animation: ownerNeonBreathe 3s ease-in-out infinite !important;
+  will-change: filter;
+}
+
+@keyframes ownerCrystalPrism {
+  0%, 100% {
+    filter: brightness(1) contrast(100%);
+  }
+  33% {
+    filter: brightness(1.25) contrast(115%) drop-shadow(0 0 6px rgba(125, 211, 252, 0.8));
+  }
+  66% {
+    filter: brightness(1.3) contrast(120%) drop-shadow(0 0 7px rgba(244, 114, 182, 0.8));
+  }
+}
+
+.animate-owner-crystal-prism {
+  animation: ownerCrystalPrism 3.2s ease-in-out infinite !important;
+  will-change: filter;
+}
+
+/* Arabic & Harakat Typography Excellence */
+.font-arabic {
+  font-family: 'Amiri', 'Noto Naskh Arabic', 'Traditional Arabic', 'Scheherazade New', serif;
+  letter-spacing: 0;
+  line-height: 1.8 !important;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Harakat Safe Overflow: Ensures tall combining diacritics are not clipped */
+.harakat-text {
+  display: inline-block;
+  overflow: visible !important;
+  line-height: 1.75;
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+}
+
+/* Responsive Viewport & Touch Optimization */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen-ios {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Custom Scrollbar for compact and scrollable modals */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.6);
 }

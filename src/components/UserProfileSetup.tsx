@@ -289,7 +289,7 @@ export const UserProfileSetup: React.FC<UserProfileSetupProps> = ({
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, '_'))}
-                  placeholder="contoh: juara_kuis"
+                  placeholder="masukkan username kamu"
                   maxLength={21}
                   autoFocus
                   // Apply active theme color and typography style here: input border & focus glow

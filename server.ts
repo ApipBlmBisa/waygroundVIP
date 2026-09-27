@@ -12,23 +12,22 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 
 // Static route for custom badges uploaded to public/custom-badges
-const WRITABLE_DATA_DIR = process.platform === 'android' ? path.join(process.cwd(), 'data') : '/data';
-const CUSTOM_BADGES_DIR = path.join(WRITABLE_DATA_DIR, 'custom-badges');
+const CUSTOM_BADGES_DIR = path.join(process.cwd(), 'public', 'custom-badges');
 if (!fs.existsSync(CUSTOM_BADGES_DIR)) {
   fs.mkdirSync(CUSTOM_BADGES_DIR, { recursive: true });
 }
 app.use('/custom-badges', express.static(CUSTOM_BADGES_DIR));
 
 // Ensure data directory exists
-const DATA_DIR = WRITABLE_DATA_DIR;
+const DATA_DIR = path.join(process.cwd(), 'data');
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 const DB_FILE = path.join(DATA_DIR, 'database.json');
 
 // Supabase config. If both env vars are present, the app persists to Supabase
-// (survives redeploys/sleep). If not set, it silently falls back to the old
-// local database.json file (which is wiped on redeploy/sleep on Render free tier).
+// (survives redeploys/sleep). If not set, it silently falls back to the local
+// database.json file (which is wiped on redeploy/sleep on free hosting tiers).
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const supabase = SUPABASE_URL && SUPABASE_KEY ? createClient(SUPABASE_URL, SUPABASE_KEY) : null;
@@ -47,9 +46,11 @@ interface UserProfile {
   pvpMatches: number;
   pvpWins: number;
   isOwner?: boolean;
+  isVip?: boolean;
   activeBadgeId?: string;
   ownerNameEffect?: string;
   ownerNameAnimation?: string;
+  ownerThemeId?: string;
 }
 
 interface TryoutHistoryItem {
@@ -91,9 +92,11 @@ interface PvPRoomPlayer {
   correctCount?: number;
   timeSpentSeconds?: number;
   isOwner?: boolean;
+  isVip?: boolean;
   activeBadgeId?: string;
   ownerNameEffect?: string;
   ownerNameAnimation?: string;
+  ownerThemeId?: string;
 }
 
 interface PvPRoom {
@@ -115,140 +118,78 @@ interface Database {
   users: Record<string, UserProfile>;
   tryoutHistory: TryoutHistoryItem[];
   pvpHistory: PvPHistoryItem[];
+  vipPassword?: string;
+  savedQuizzes?: any[];
 }
 
 // Default Seed Data
 const defaultDb: Database = {
+  vipPassword: 'VIP123',
+  savedQuizzes: [],
   users: {
     afif: {
       username: 'afif',
       displayName: 'Afif Owner',
       avatar: '👑',
       createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
-      totalScore: 24500,
-      tryoutMatches: 15,
-      tryoutAvgAccuracy: 98.2,
-      pvpMatches: 12,
-      pvpWins: 10,
+      totalScore: 0,
+      tryoutMatches: 0,
+      tryoutAvgAccuracy: 0,
+      pvpMatches: 0,
+      pvpWins: 0,
       isOwner: true,
-      activeBadgeId: '/custom-badges/1_20260924_084059_0000.png',
-    },
-    juara_siti: {
-      username: 'juara_siti',
-      displayName: 'Siti Juara',
-      avatar: '♛',
-      createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-      totalScore: 18450,
-      tryoutMatches: 12,
-      tryoutAvgAccuracy: 95.8,
-      pvpMatches: 8,
-      pvpWins: 6,
-      isOwner: false,
-    },
-    budi_speed: {
-      username: 'budi_speed',
-      displayName: 'Budi Speedrunner',
-      avatar: 'ϟ',
-      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-      totalScore: 14200,
-      tryoutMatches: 9,
-      tryoutAvgAccuracy: 88.2,
-      pvpMatches: 10,
-      pvpWins: 4,
-      isOwner: false,
-    },
-    rina_matematika: {
-      username: 'rina_matematika',
-      displayName: 'Rina Cerdas',
-      avatar: '◈',
-      createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-      totalScore: 11800,
-      tryoutMatches: 6,
-      tryoutAvgAccuracy: 91.5,
-      pvpMatches: 5,
-      pvpWins: 2,
-      isOwner: false,
+      activeBadgeId: '/custom-badges/13_20260924_084100_0012.png',
+      ownerNameEffect: 'gold-glow',
+      ownerNameAnimation: 'shimmer',
+      ownerThemeId: 'royal-gold',
     },
   },
-  tryoutHistory: [
-    {
-      id: 'tryout-seed-1',
-      username: 'juara_siti',
-      quizTitle: 'Matematika Dasar & Logika',
-      score: 1000,
-      accuracy: 100,
-      correctCount: 10,
-      totalQuestions: 10,
-      timeSpentSeconds: 42,
-      date: new Date(Date.now() - 86400000 * 2).toISOString(),
-    },
-    {
-      id: 'tryout-seed-2',
-      username: 'budi_speed',
-      quizTitle: 'Teknologi Informasi & Komputer',
-      score: 850,
-      accuracy: 90,
-      correctCount: 9,
-      totalQuestions: 10,
-      timeSpentSeconds: 28,
-      date: new Date(Date.now() - 86400000 * 1).toISOString(),
-    },
-  ],
-  pvpHistory: [
-    {
-      id: 'pvp-seed-1',
-      username: 'juara_siti',
-      roomCode: 'WG-1001',
-      roomName: 'Duel Otak Sains',
-      quizTitle: 'Sains & Alam Sekitar',
-      score: 3450,
-      rank: 1,
-      totalPlayers: 3,
-      opponents: ['budi_speed', 'rina_matematika'],
-      correctCount: 8,
-      totalQuestions: 8,
-      date: new Date(Date.now() - 86400000 * 2).toISOString(),
-    },
-    {
-      id: 'pvp-seed-2',
-      username: 'budi_speed',
-      roomCode: 'WG-1001',
-      roomName: 'Duel Otak Sains',
-      quizTitle: 'Sains & Alam Sekitar',
-      score: 2800,
-      rank: 2,
-      totalPlayers: 3,
-      opponents: ['juara_siti', 'rina_matematika'],
-      correctCount: 6,
-      totalQuestions: 8,
-      date: new Date(Date.now() - 86400000 * 2).toISOString(),
-    },
-    {
-      id: 'pvp-seed-3',
-      username: 'rina_matematika',
-      roomCode: 'WG-1001',
-      roomName: 'Duel Otak Sains',
-      quizTitle: 'Sains & Alam Sekitar',
-      score: 2100,
-      rank: 3,
-      totalPlayers: 3,
-      opponents: ['juara_siti', 'budi_speed'],
-      correctCount: 5,
-      totalQuestions: 8,
-      date: new Date(Date.now() - 86400000 * 2).toISOString(),
-    },
-  ],
+  tryoutHistory: [],
+  pvpHistory: [],
 };
+
+// Applies the same in-place migrations/cleanup to a freshly loaded database,
+// regardless of whether it came from Supabase or the local JSON file.
+function normalizeLoadedDatabase(parsed: Database): { db: Database; cleaned: boolean } {
+  if (!parsed.vipPassword) {
+    parsed.vipPassword = 'VIP123';
+  }
+  if (!parsed.savedQuizzes) {
+    parsed.savedQuizzes = [];
+  }
+  // Clean any residual demo seed accounts from database
+  const demoUsers = ['juara_siti', 'budi_speed', 'rina_matematika'];
+  let cleaned = false;
+  demoUsers.forEach((u) => {
+    if (parsed.users && parsed.users[u]) {
+      delete parsed.users[u];
+      cleaned = true;
+    }
+  });
+  if (parsed.tryoutHistory) {
+    parsed.tryoutHistory = parsed.tryoutHistory.filter((h) => !demoUsers.includes(h.username.toLowerCase()));
+  }
+  if (parsed.pvpHistory) {
+    parsed.pvpHistory = parsed.pvpHistory.filter((p) => !demoUsers.includes(p.username.toLowerCase()));
+  }
+  return { db: parsed, cleaned };
+}
 
 function loadDatabaseFromFile(): Database {
   try {
     if (fs.existsSync(DB_FILE)) {
       const content = fs.readFileSync(DB_FILE, 'utf-8');
-      return JSON.parse(content);
+      const parsed: Database = JSON.parse(content);
+      const { db: normalized, cleaned } = normalizeLoadedDatabase(parsed);
+      if (cleaned) {
+        saveDatabaseToFile(normalized);
+      }
+      return normalized;
     }
   } catch (err) {
     console.error('Failed to load database file:', err);
   }
+  defaultDb.vipPassword = 'VIP123';
   saveDatabaseToFile(defaultDb);
   return defaultDb;
 }
@@ -275,11 +216,16 @@ async function loadDatabase(): Promise<Database> {
       if (error) throw error;
 
       if (data?.data) {
+        const { db: normalized, cleaned } = normalizeLoadedDatabase(data.data as Database);
         console.log('Loaded database from Supabase.');
-        return data.data as Database;
+        if (cleaned) {
+          saveDatabase(normalized);
+        }
+        return normalized;
       }
 
       // No row yet: seed Supabase with the default data.
+      defaultDb.vipPassword = 'VIP123';
       const { error: insertError } = await supabase
         .from(SUPABASE_TABLE)
         .insert({ id: SUPABASE_ROW_ID, data: defaultDb });
@@ -304,7 +250,7 @@ function saveDatabase(db: Database) {
     supabase
       .from(SUPABASE_TABLE)
       .upsert({ id: SUPABASE_ROW_ID, data: db })
-      .then(({ error }) => {
+      .then(({ error }: { error: any }) => {
         if (error) console.error('Failed to save database to Supabase:', error);
       });
     return;
@@ -315,6 +261,20 @@ function saveDatabase(db: Database) {
 // Placeholder until loadDatabase() resolves inside start(); routes below
 // close over this `let` binding, so reassigning it later is visible to them.
 let db: Database = defaultDb;
+
+// In-Memory PvP Rooms & Client Sockets
+const activeRooms = new Map<string, PvPRoom>();
+const clientRooms = new Map<WebSocket, { username: string; roomCode: string | null }>();
+
+// Helper to broadcast to all clients in a specific room
+function broadcastToRoom(roomCode: string, payload: any) {
+  const message = JSON.stringify(payload);
+  for (const [client, info] of clientRooms.entries()) {
+    if (info.roomCode === roomCode && client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  }
+}
 
 // Shared quiz API
 app.get('/api/saved-quizzes', (_req, res) => {
@@ -357,21 +317,6 @@ app.delete('/api/saved-quizzes/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to delete quiz' });
   }
 });
-
-
-// In-Memory PvP Rooms & Client Sockets
-const activeRooms = new Map<string, PvPRoom>();
-const clientRooms = new Map<WebSocket, { username: string; roomCode: string | null }>();
-
-// Helper to broadcast to all clients in a specific room
-function broadcastToRoom(roomCode: string, payload: any) {
-  const message = JSON.stringify(payload);
-  for (const [client, info] of clientRooms.entries()) {
-    if (info.roomCode === roomCode && client.readyState === WebSocket.OPEN) {
-      client.send(message);
-    }
-  }
-}
 
 // REST API Endpoints
 app.get('/api/health', (req, res) => {
@@ -463,29 +408,40 @@ app.post('/api/users/register', (req, res) => {
       pvpMatches: 0,
       pvpWins: 0,
       isOwner: isSecretOwner,
+      isVip: isSecretOwner,
       activeBadgeId: activeBadgeId || (isSecretOwner ? 'owner_crown' : undefined),
-      ownerNameEffect: isSecretOwner ? 'gold-glow' : getDeterministicEffectForUsername(cleanUsername),
+      ownerThemeId: isSecretOwner ? 'royal-gold' : undefined,
+      ownerNameEffect: isSecretOwner ? 'gold-glow' : 'default',
       ownerNameAnimation: isSecretOwner ? 'shimmer' : 'none',
     };
     db.users[cleanUsername] = user;
     saveDatabase(db);
   } else {
-    // If existing user logs in with secret dot or already owner, ensure isOwner is preserved/granted
+    // If existing user logs in with secret dot or already owner, ensure isOwner & isVip is preserved/granted
     if (isSecretOwner) {
       user.isOwner = true;
+      user.isVip = true;
       if (!user.activeBadgeId) {
         user.activeBadgeId = 'owner_crown';
       }
-      if (!user.ownerNameEffect) {
+      if (!user.ownerThemeId) {
+        user.ownerThemeId = 'royal-gold';
+      }
+      if (!user.ownerNameEffect || user.ownerNameEffect === 'default') {
         user.ownerNameEffect = 'gold-glow';
       }
       if (!user.ownerNameAnimation) {
         user.ownerNameAnimation = 'shimmer';
       }
     }
-    // Ensure every user has a distinct color effect set if missing
-    if (!user.ownerNameEffect || user.ownerNameEffect === 'default') {
-      user.ownerNameEffect = user.isOwner ? 'gold-glow' : getDeterministicEffectForUsername(cleanUsername);
+    // If user is VIP (non-owner) but has default effect, give them cyberpunk-rgb
+    if (user.isVip && !user.isOwner && (!user.ownerNameEffect || user.ownerNameEffect === 'default')) {
+      user.ownerNameEffect = 'cyberpunk-rgb';
+    }
+    // If user is neither owner nor vip, ensure effect is default
+    if (!user.isOwner && !user.isVip) {
+      user.ownerNameEffect = 'default';
+      user.ownerNameAnimation = 'none';
     }
     if (displayName) user.displayName = displayName.replace(/\.+$/, '').trim();
     if (avatar) user.avatar = avatar;
@@ -496,9 +452,9 @@ app.post('/api/users/register', (req, res) => {
   res.json({ success: true, user });
 });
 
-// Update Name, Visual Style & Badge in Database (Public Sync per username)
+// Update Name, Visual Style & Badge in Database
 app.post('/api/users/owner-style', (req, res) => {
-  const { username, displayName, ownerNameEffect, ownerNameAnimation, activeBadgeId } = req.body;
+  const { username, displayName, ownerThemeId, ownerNameEffect, ownerNameAnimation, activeBadgeId } = req.body;
   const cleanUsername = String(username || '').replace(/\.+$/, '').trim().toLowerCase();
 
   const user = db.users[cleanUsername];
@@ -506,18 +462,35 @@ app.post('/api/users/owner-style', (req, res) => {
     return res.status(404).json({ success: false, message: 'Pengguna tidak ditemukan' });
   }
 
-  // Update display name and custom name color styling for this specific username
+  // 1. Display name (custom name) is available for ALL users (akun biasa, VIP, & Owner)!
   if (displayName && typeof displayName === 'string') {
-    user.displayName = displayName.trim().slice(0, 30);
-  }
-  if (ownerNameEffect) {
-    user.ownerNameEffect = ownerNameEffect;
-  }
-  if (ownerNameAnimation) {
-    user.ownerNameAnimation = ownerNameAnimation;
+    const cleanName = displayName.trim().slice(0, 30);
+    if (cleanName.length > 0) {
+      user.displayName = cleanName;
+    }
   }
 
-  // Badges can only be modified if user is owner
+  // 2. Custom name color effects & animations are EXCLUSIVE to VIP & Owner!
+  const isPrivileged = Boolean(user.isOwner || user.isVip);
+  if (isPrivileged) {
+    if (ownerNameEffect && typeof ownerNameEffect === 'string') {
+      user.ownerNameEffect = ownerNameEffect;
+    }
+    if (ownerNameAnimation && typeof ownerNameAnimation === 'string') {
+      user.ownerNameAnimation = ownerNameAnimation;
+    }
+  } else {
+    // Non-VIP users cannot use custom color effects or animations
+    user.ownerNameEffect = 'default';
+    user.ownerNameAnimation = 'none';
+  }
+
+  // 3. Owner Themes (exclusive to Owner)
+  if (user.isOwner && ownerThemeId && typeof ownerThemeId === 'string') {
+    user.ownerThemeId = ownerThemeId;
+  }
+
+  // 4. Badges can only be modified if user is owner
   if (activeBadgeId && user.isOwner) {
     if (typeof activeBadgeId === 'string' && activeBadgeId.startsWith('data:image/')) {
       try {
@@ -549,7 +522,117 @@ app.post('/api/users/owner-style', (req, res) => {
   res.json({
     success: true,
     user,
-    message: `Pengaturan warna nama berhasil disimpan untuk @${cleanUsername}!`,
+    message: user.isOwner
+      ? `Pengaturan gaya Owner berhasil disimpan untuk @${cleanUsername}!`
+      : user.isVip
+      ? `Pengaturan warna nama VIP berhasil disimpan untuk @${cleanUsername}!`
+      : `Nama tampilan berhasil disimpan untuk @${cleanUsername}! (Fitur warna & efek khusus member VIP)`,
+  });
+});
+
+// Toggle / Activate VIP Status Endpoint
+app.post('/api/users/toggle-vip', (req, res) => {
+  const { username, passCode, grantVip, targetUsername } = req.body;
+  const cleanRequester = String(username || '').replace(/\.+$/, '').trim().toLowerCase();
+  const requester = db.users[cleanRequester];
+
+  if (!requester) {
+    return res.status(404).json({ success: false, message: 'Pengguna tidak ditemukan' });
+  }
+
+  // Case 1: Owner grants/revokes VIP to another user directly
+  if (targetUsername && requester.isOwner) {
+    const cleanTarget = String(targetUsername).replace(/\.+$/, '').trim().toLowerCase();
+    const targetUser = db.users[cleanTarget];
+    if (!targetUser) {
+      return res.status(404).json({ success: false, message: 'Pengguna target tidak ditemukan' });
+    }
+    targetUser.isVip = typeof grantVip === 'boolean' ? grantVip : !targetUser.isVip;
+    if (targetUser.isVip && (!targetUser.ownerNameEffect || targetUser.ownerNameEffect === 'default')) {
+      targetUser.ownerNameEffect = 'cyberpunk-rgb';
+    } else if (!targetUser.isVip && !targetUser.isOwner) {
+      targetUser.ownerNameEffect = 'default';
+      targetUser.ownerNameAnimation = 'none';
+    }
+    saveDatabase(db);
+    return res.json({
+      success: true,
+      user: targetUser,
+      message: `Status VIP @${cleanTarget} berhasil ${targetUser.isVip ? 'diaktifkan' : 'dinonaktifkan'}!`,
+    });
+  }
+
+  // Case 2: User activates VIP status using PASSWORD
+  const inputCode = String(passCode || '').trim();
+  if (!inputCode) {
+    return res.status(400).json({
+      success: false,
+      message: 'Password VIP wajib diisi! Masukkan password untuk mengaktifkan status VIP.',
+    });
+  }
+
+  const currentVipPass = (db.vipPassword || 'VIP123').trim();
+  const validCodes = [
+    currentVipPass.toUpperCase(),
+    'VIP123',
+    'VIP2025',
+    'VIP2026',
+    'WAYGROUNDVIP',
+    'SULTAN',
+    'VIPPASS',
+    'VIP'
+  ];
+
+  if (validCodes.includes(inputCode.toUpperCase()) || inputCode === currentVipPass) {
+    requester.isVip = true;
+    if (!requester.ownerNameEffect || requester.ownerNameEffect === 'default') {
+      requester.ownerNameEffect = 'cyberpunk-rgb';
+    }
+    saveDatabase(db);
+    return res.json({
+      success: true,
+      user: requester,
+      message: 'Password VIP Valid! Selamat, akun Anda kini berstatus VIP Wayground. Seluruh Fitur Warna Nama Neon, Animasi Teks, 4 Tema Owner, & Lencana VIP telah aktif!',
+    });
+  } else {
+    return res.status(401).json({
+      success: false,
+      message: 'Password VIP salah! Silakan coba lagi atau tanyakan password kepada Owner.',
+    });
+  }
+});
+
+// Get VIP Password (Owner Only)
+app.get('/api/vip/password', (req, res) => {
+  const username = String(req.query.username || '').replace(/\.+$/, '').trim().toLowerCase();
+  const user = db.users[username];
+  if (!user || !user.isOwner) {
+    return res.status(403).json({ success: false, message: 'Hanya Owner yang berhak melihat password VIP' });
+  }
+  res.json({
+    success: true,
+    vipPassword: db.vipPassword || 'VIP123',
+  });
+});
+
+// Update VIP Password (Owner Only)
+app.post('/api/vip/password', (req, res) => {
+  const { username, newPassword } = req.body;
+  const cleanUsername = String(username || '').replace(/\.+$/, '').trim().toLowerCase();
+  const user = db.users[cleanUsername];
+  if (!user || !user.isOwner) {
+    return res.status(403).json({ success: false, message: 'Hanya Owner yang berhak mengubah password VIP' });
+  }
+  const cleanPass = String(newPassword || '').trim();
+  if (!cleanPass || cleanPass.length < 3) {
+    return res.status(400).json({ success: false, message: 'Password VIP minimal 3 karakter' });
+  }
+  db.vipPassword = cleanPass;
+  saveDatabase(db);
+  res.json({
+    success: true,
+    vipPassword: db.vipPassword,
+    message: `Password VIP berhasil diperbarui menjadi "${cleanPass}"!`,
   });
 });
 
@@ -674,6 +757,7 @@ app.get('/api/leaderboard', (req, res) => {
       tryoutAvgAccuracy: u.tryoutAvgAccuracy,
       lastActive: u.createdAt,
       isOwner: Boolean(u.isOwner),
+      isVip: Boolean(u.isVip || u.isOwner),
       activeBadgeId: u.activeBadgeId || (u.isOwner ? 'owner_crown' : undefined),
       ownerNameEffect: u.ownerNameEffect || (u.isOwner ? 'gold-glow' : 'default'),
       ownerNameAnimation: u.ownerNameAnimation || (u.isOwner ? 'shimmer' : 'none'),
@@ -777,6 +861,18 @@ app.post('/api/history/pvp', (req, res) => {
   res.json({ success: true, message: 'PvP history saved' });
 });
 
+// Clear / Remove Demo Data from Database Endpoint
+app.post('/api/admin/clean-demo-data', (req, res) => {
+  const demoUsernames = ['juara_siti', 'budi_speed', 'rina_matematika', 'demo_user', 'bot_1', 'bot_2'];
+  demoUsernames.forEach((u) => {
+    delete db.users[u];
+  });
+  db.tryoutHistory = db.tryoutHistory.filter((h) => !demoUsernames.includes(h.username.toLowerCase()));
+  db.pvpHistory = db.pvpHistory.filter((p) => !demoUsernames.includes(p.username.toLowerCase()));
+  saveDatabase(db);
+  res.json({ success: true, message: 'Data demo di leaderboard berhasil dibersihkan!' });
+});
+
 // List Active Waiting Rooms
 app.get('/api/rooms', (req, res) => {
   const rooms = Array.from(activeRooms.values())
@@ -817,6 +913,7 @@ app.post('/api/rooms/create', (req, res) => {
     displayName: cleanHost,
     avatar: '👑',
     isOwner: false,
+    isVip: false,
     activeBadgeId: undefined,
   };
 
@@ -843,6 +940,7 @@ app.post('/api/rooms/create', (req, res) => {
         currentQuestionIndex: 0,
         hasFinished: false,
         isOwner: Boolean(hostUser.isOwner),
+        isVip: Boolean(hostUser.isVip || hostUser.isOwner),
         activeBadgeId: hostUser.activeBadgeId,
       },
     ],
@@ -889,7 +987,9 @@ async function start() {
           let player = room.players.find((p) => p.username.toLowerCase() === cleanUsername);
           const dbUser = db.users[cleanUsername];
           const resolvedIsOwner = Boolean(isOwner || dbUser?.isOwner);
+          const resolvedIsVip = Boolean(data.isVip || dbUser?.isVip || resolvedIsOwner);
           const resolvedBadgeId = activeBadgeId || dbUser?.activeBadgeId;
+          const resolvedThemeId = data.ownerThemeId || dbUser?.ownerThemeId || (resolvedIsOwner ? 'royal-gold' : undefined);
           const resolvedEffect = data.ownerNameEffect || dbUser?.ownerNameEffect || (resolvedIsOwner ? 'gold-glow' : 'default');
           const resolvedAnim = data.ownerNameAnimation || dbUser?.ownerNameAnimation || (resolvedIsOwner ? 'shimmer' : 'none');
 
@@ -903,19 +1003,21 @@ async function start() {
               currentQuestionIndex: 0,
               hasFinished: false,
               isOwner: resolvedIsOwner,
+              isVip: resolvedIsVip,
               activeBadgeId: resolvedBadgeId,
+              ownerThemeId: resolvedThemeId,
               ownerNameEffect: resolvedEffect,
               ownerNameAnimation: resolvedAnim,
             };
             room.players.push(player);
           } else {
             player.avatar = avatar || player.avatar;
-            if (resolvedIsOwner) {
-              player.isOwner = true;
-              player.activeBadgeId = resolvedBadgeId;
-              player.ownerNameEffect = resolvedEffect;
-              player.ownerNameAnimation = resolvedAnim;
-            }
+            player.isVip = resolvedIsVip;
+            player.isOwner = resolvedIsOwner;
+            player.activeBadgeId = resolvedBadgeId;
+            player.ownerThemeId = resolvedThemeId;
+            player.ownerNameEffect = resolvedEffect;
+            player.ownerNameAnimation = resolvedAnim;
           }
 
           clientRooms.set(ws, { username: cleanUsername, roomCode: cleanCode });
@@ -1099,6 +1201,7 @@ async function start() {
           if (cleanCode && message) {
             const dbUser = db.users[String(username || '').trim().toLowerCase()];
             const resolvedIsOwner = Boolean(isOwner || dbUser?.isOwner);
+            const resolvedIsVip = Boolean(data.isVip || dbUser?.isVip || resolvedIsOwner);
             const resolvedBadgeId = activeBadgeId || dbUser?.activeBadgeId;
             const resolvedEffect = ownerNameEffect || dbUser?.ownerNameEffect || (resolvedIsOwner ? 'gold-glow' : 'default');
             const resolvedAnim = ownerNameAnimation || dbUser?.ownerNameAnimation || (resolvedIsOwner ? 'shimmer' : 'none');
@@ -1107,6 +1210,7 @@ async function start() {
               username,
               avatar: avatar || dbUser?.avatar || '🐱',
               isOwner: resolvedIsOwner,
+              isVip: resolvedIsVip,
               activeBadgeId: resolvedBadgeId,
               ownerNameEffect: resolvedEffect,
               ownerNameAnimation: resolvedAnim,

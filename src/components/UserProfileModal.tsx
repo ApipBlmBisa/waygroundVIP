@@ -4,7 +4,7 @@ import { ThemePreset, getThemePreset } from '../utils/themes';
 import { fetchUserProfile, registerUserProfile, updateOwnerBadge, fetchCustomBadges } from '../utils/api';
 import { CustomBadgeItem } from '../types';
 import { OWNER_BADGES, getOwnerBadge } from '../utils/badges';
-import { OwnerBadge } from './OwnerBadge';
+import { OwnerBadge, VipBadge } from './OwnerBadge';
 import { OwnerNameText } from './OwnerNameText';
 import { OwnerCustomizationModal } from './OwnerCustomizationModal';
 import {
@@ -33,6 +33,7 @@ import {
   FolderOpen,
   RefreshCw,
   FolderCheck,
+  Star,
 } from 'lucide-react';
 import { UNIQUE_SYMBOLS, UserAvatar, getSymbolConfig } from './UserAvatar';
 
@@ -253,11 +254,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       <OwnerNameText
                         name={profile.displayName}
                         isOwner={profile.isOwner}
+                        isVip={profile.isVip}
                         effect={profile.ownerNameEffect || 'gold-glow'}
                         animation={profile.ownerNameAnimation || 'shimmer'}
                         className="text-xl sm:text-2xl font-black"
                       />
-                      {profile.isOwner && (
+                      {profile.isOwner ? (
                         <OwnerBadge
                           badgeId={profile.activeBadgeId || 'owner_crown'}
                           isOwner={true}
@@ -265,7 +267,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                           showLabel
                           showTitle
                         />
-                      )}
+                      ) : profile.isVip ? (
+                        <VipBadge size="sm" showLabel />
+                      ) : null}
                     </div>
 
                     <div className="flex items-center gap-1.5">
@@ -285,24 +289,45 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                           <Crown className="w-3.5 h-3.5 text-amber-400 animate-pulse fill-amber-400/20" />
                           <span>Gaya Owner</span>
                         </button>
+                      ) : profile.isVip ? (
+                        <button
+                          onClick={() => setShowOwnerCustomizer(true)}
+                          className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-amber-500/20 hover:from-purple-500/30 hover:to-amber-500/30 border border-purple-400/50 text-purple-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-[0_0_12px_rgba(168,85,247,0.3)] transition-all hover:scale-105 active:scale-95"
+                          title="Buka Pengaturan Warna Nama VIP Anda"
+                        >
+                          <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                          <span>Warna VIP</span>
+                        </button>
                       ) : (
                         <button
                           onClick={() => setShowOwnerCustomizer(true)}
-                          className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 hover:from-purple-500/30 hover:to-indigo-500/30 border border-purple-400/50 text-purple-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-[0_0_12px_rgba(168,85,247,0.2)] transition-all hover:scale-105 active:scale-95"
-                          title="Buka Pengaturan Warna & Gaya Nama Anda"
+                          className="px-2.5 py-1 rounded-xl bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/40 text-purple-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all hover:scale-105 active:scale-95"
+                          title="Buka Kustomisasi Nama & Aktivasi Warna VIP"
                         >
-                          <Palette className="w-3.5 h-3.5 text-purple-400" />
-                          <span>Warna Nama</span>
+                          <Star className="w-3.5 h-3.5 text-amber-300" />
+                          <span>Kustom Nama / VIP</span>
                         </button>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center justify-center sm:justify-start gap-2 mt-1">
                     <p className={`text-xs sm:text-sm font-mono ${currentTheme.accentClass}`}>@{profile.username}</p>
-                    {profile.isOwner && (
+                    {profile.isOwner ? (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">
-                        Hak Akses Owner
+                        👑 Hak Akses Owner
                       </span>
+                    ) : profile.isVip ? (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold flex items-center gap-1">
+                        <Star className="w-2.5 h-2.5 text-amber-300 fill-amber-300" />
+                        <span>Member VIP</span>
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => setShowOwnerCustomizer(true)}
+                        className="text-[10px] px-2 py-0.5 rounded-full bg-purple-950/60 text-purple-300 hover:text-white border border-purple-500/40 font-bold cursor-pointer transition-colors"
+                      >
+                        ⭐ Buka Akses VIP
+                      </button>
                     )}
                   </div>
                 </>

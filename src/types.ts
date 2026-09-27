@@ -72,12 +72,21 @@ export interface SecurityConfig {
   lastChangedAt: number;
 }
 
+export type OwnerThemeId =
+  | 'royal-gold'
+  | 'cyberpunk-void'
+  | 'galactic-cosmos'
+  | 'inferno-lava'
+  | 'default';
+
 export type OwnerNameEffect =
   | 'default'
   | 'gold-glow'
   | 'cyberpunk-rgb'
   | 'fire-lava'
   | 'holographic'
+  | 'diamond-ice'
+  | 'amethyst-void'
   | 'emerald-matrix'
   | 'ocean-abyss'
   | 'sunset-flare'
@@ -91,7 +100,17 @@ export type OwnerNameAnimation =
   | 'none'
   | 'shimmer'
   | 'neon-glow'
-  | 'pulse-wave';
+  | 'pulse-wave'
+  | 'flame-flicker'
+  | 'glitch'
+  | 'aurora-flow'
+  | 'cosmic-sparkle'
+  | 'electric-spark'
+  | 'rainbow-cycle'
+  | 'floating-levitate'
+  | 'heartbeat-pulse'
+  | 'neon-breathe'
+  | 'crystal-prism';
 
 // User Profile
 export interface UserProfile {
@@ -105,7 +124,9 @@ export interface UserProfile {
   pvpMatches: number;
   pvpWins: number;
   isOwner?: boolean;
+  isVip?: boolean;
   activeBadgeId?: string;
+  ownerThemeId?: OwnerThemeId;
   ownerNameEffect?: OwnerNameEffect;
   ownerNameAnimation?: OwnerNameAnimation;
 }
@@ -151,7 +172,9 @@ export interface PvPRoomPlayer {
   correctCount?: number;
   timeSpentSeconds?: number;
   isOwner?: boolean;
+  isVip?: boolean;
   activeBadgeId?: string;
+  ownerThemeId?: OwnerThemeId;
   ownerNameEffect?: OwnerNameEffect;
   ownerNameAnimation?: OwnerNameAnimation;
 }
@@ -193,6 +216,7 @@ export interface LeaderboardEntry {
   tryoutAvgAccuracy: number;
   lastActive: string;
   isOwner?: boolean;
+  isVip?: boolean;
   activeBadgeId?: string;
   ownerNameEffect?: OwnerNameEffect;
   ownerNameAnimation?: OwnerNameAnimation;

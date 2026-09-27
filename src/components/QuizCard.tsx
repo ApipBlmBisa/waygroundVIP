@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { CardPhase, FlashcardQuestion, ThemeId, UserAnswerResult } from '../types';
 import { getThemePreset } from '../utils/themes';
+import { isArabicText } from '../utils/excelParser';
 import {
   CheckCircle2,
   XCircle,
@@ -148,6 +149,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
 
   // Urgency color for question timer
   const timerUrgent = cardPhase === 'answering' && questionTimerRemaining <= 2;
+  const isArabicQuestion = isArabicText(question.question);
 
   const optionsList: Array<{ key: 'A' | 'B' | 'C' | 'D'; text: string }> = [
     { key: 'A', text: question.options.A },
@@ -158,10 +160,10 @@ export const QuizCard: React.FC<QuizCardProps> = ({
 
   return (
     <div className="w-full max-w-4xl perspective-1000 mx-auto select-none" id="quiz-card-container">
-      {/* 3D Flipping Card Container */}
+      {/* 3D Flipping Card Container - Responsive on all devices */}
       <div
         ref={cardRef}
-        className={`relative w-full min-h-[580px] sm:min-h-[620px] rounded-3xl transform-style-3d transition-transform duration-700 ease-out ${
+        className={`relative w-full min-h-[460px] sm:min-h-[520px] md:min-h-[580px] rounded-2xl sm:rounded-3xl transform-style-3d transition-transform duration-700 ease-out ${
           isFlipped ? 'rotate-y-180' : ''
         }`}
       >
@@ -169,7 +171,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
         {/* SISI DEPAN (SOAL)                                          */}
         {/* ========================================================= */}
         <div
-          className={`absolute inset-0 w-full h-full backface-hidden rounded-3xl bg-slate-950/95 glass-card ${currentTheme.accentGlowClass} p-5 sm:p-8 flex flex-col justify-between overflow-hidden`}
+          className={`absolute inset-0 w-full h-full backface-hidden rounded-2xl sm:rounded-3xl bg-slate-950/95 glass-card ${currentTheme.accentGlowClass} p-3.5 sm:p-6 md:p-8 flex flex-col justify-between overflow-hidden`}
           id="quiz-card-front"
         >
           {/* Top Progress Bar: Dynamic depending on Reading vs Answering */}
@@ -192,10 +194,10 @@ export const QuizCard: React.FC<QuizCardProps> = ({
           </div>
 
           {/* Card Header: Metadata & Dynamic Timer Indicator */}
-          <div className="flex items-center justify-between gap-3 pt-2">
+          <div className="flex items-center justify-between gap-2 pt-1 sm:pt-2">
             {/* Question Counter Badge & Shuffle Mode Indicator */}
-            <div className="flex items-center gap-2">
-              <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase ${currentTheme.badgeBgClass} flex items-center gap-1.5 shadow-sm`}>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold tracking-wide uppercase ${currentTheme.badgeBgClass} flex items-center gap-1.5 shadow-sm`}>
                 <Sparkles className={`w-3.5 h-3.5 ${currentTheme.accentClass} animate-pulse`} />
                 Soal {currentIndex + 1} / {totalQuestions}
               </span>
@@ -211,22 +213,22 @@ export const QuizCard: React.FC<QuizCardProps> = ({
             {/* Live Timer Badge (Reading Phase vs Answering Phase) */}
             {cardPhase === 'reading' || cardPhase === 'transitioning' ? (
               <div
-                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs sm:text-sm font-bold bg-cyan-950/60 border-cyan-400/40 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] animate-pulse"
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border text-[11px] sm:text-sm font-bold bg-cyan-950/60 border-cyan-400/40 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] animate-pulse"
                 title="Waktu membaca soal sebelum opsi muncul"
               >
-                <Eye className="w-4 h-4 text-cyan-400 animate-pulse" />
+                <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 animate-pulse" />
                 <span>Baca Soal: {readTimerRemaining.toFixed(1)}s</span>
               </div>
             ) : (
               <div
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs sm:text-sm font-bold transition-all duration-300 ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border text-[11px] sm:text-sm font-bold transition-all duration-300 ${
                   timerUrgent
                     ? 'bg-rose-500/25 border-rose-500/50 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.4)] animate-bounce'
                     : 'bg-slate-800/80 border-slate-700/80 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)]'
                 }`}
                 title="Waktu memilih opsi jawaban"
               >
-                <Clock className={`w-4 h-4 ${timerUrgent ? 'text-rose-400 animate-spin' : 'text-amber-400'}`} />
+                <Clock className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${timerUrgent ? 'text-rose-400 animate-spin' : 'text-amber-400'}`} />
                 <span>Waktu Jawab: {questionTimerRemaining.toFixed(1)}s</span>
               </div>
             )}
@@ -244,13 +246,18 @@ export const QuizCard: React.FC<QuizCardProps> = ({
             </div>
           </div>
 
-          {/* Question Text in Center-Top */}
-          <div className="my-auto py-6 px-2 sm:px-6 flex flex-col items-center justify-center text-center">
-            <span className="text-xs tracking-widest text-indigo-300/80 uppercase font-semibold mb-3 flex items-center gap-1.5 font-display">
+          {/* Question Text in Center-Top (Supporting Arabic & Harakat) */}
+          <div className="my-auto py-3 sm:py-6 px-1 sm:px-6 flex flex-col items-center justify-center text-center">
+            <span className="text-[10px] sm:text-xs tracking-widest text-indigo-300/80 uppercase font-semibold mb-2 sm:mb-3 flex items-center gap-1.5 font-display">
               <HelpCircle className="w-3.5 h-3.5 text-indigo-400" />
               Pertanyaan
             </span>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-relaxed max-w-2xl drop-shadow-md font-display">
+            <h2
+              dir="auto"
+              className={`text-lg sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-relaxed max-w-2xl drop-shadow-md break-words ${
+                isArabicQuestion ? 'font-arabic text-xl sm:text-3xl py-1' : 'font-display'
+              }`}
+            >
               {question.question}
             </h2>
           </div>
@@ -258,26 +265,33 @@ export const QuizCard: React.FC<QuizCardProps> = ({
           {/* Bottom Area: Phase 1 (Reading prompt) vs Phase 2 (2x2 Answer Grid) */}
           {cardPhase === 'answering' ? (
             /* FASE MENJAWAB: 2x2 Answer Options Grid muncul */
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5 pt-3 animate-fade-in-up">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4 md:gap-5 pt-2 sm:pt-3 animate-fade-in-up">
               {optionsList.map((opt, idx) => {
                 const style = OPTION_STYLES[opt.key];
+                const isArabicOpt = isArabicText(opt.text);
                 return (
                   <button
                     key={opt.key}
                     id={`quiz-option-${opt.key.toLowerCase()}`}
                     onClick={() => onSelectOption(opt.key)}
-                    className={`group relative flex items-center p-4 sm:p-5 min-h-[76px] sm:min-h-[86px] rounded-2xl bg-slate-900/70 backdrop-blur-md border ${style.border} ${style.hover} text-left transition-all duration-200 active:scale-[0.98] cursor-pointer shadow-md`}
+                    className={`group relative flex items-center p-3 sm:p-4 md:p-5 min-h-[58px] sm:min-h-[74px] md:min-h-[82px] rounded-xl sm:rounded-2xl bg-slate-900/70 backdrop-blur-md border ${style.border} ${style.hover} text-left transition-all duration-200 active:scale-[0.98] cursor-pointer shadow-md`}
                   >
                     {/* Option Badge (A, B, C, D) */}
                     <div
-                      className={`shrink-0 w-11 h-11 sm:w-13 sm:h-13 rounded-2xl ${style.badgeBg} ${style.badgeText} flex items-center justify-center font-black text-lg sm:text-xl shadow-md group-hover:scale-110 transition-transform duration-200 mr-4`}
+                      className={`shrink-0 w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-xl sm:rounded-2xl ${style.badgeBg} ${style.badgeText} flex items-center justify-center font-black text-base sm:text-lg md:text-xl shadow-md group-hover:scale-110 transition-transform duration-200 mr-3 sm:mr-4`}
                     >
                       {opt.key}
                     </div>
 
-                    {/* Option Text */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-base sm:text-lg md:text-xl font-bold text-slate-100 group-hover:text-white leading-snug">
+                    {/* Option Text (Supporting Arabic Harakat & Clean Numbers) */}
+                    <div className="flex-1 min-w-0 overflow-visible py-0.5" dir="auto">
+                      <p
+                        className={`font-bold text-slate-100 group-hover:text-white harakat-text break-words ${
+                          isArabicOpt
+                            ? 'font-arabic text-base sm:text-lg md:text-xl leading-relaxed'
+                            : 'text-sm sm:text-base md:text-lg leading-snug'
+                        }`}
+                      >
                         {opt.text}
                       </p>
                     </div>
@@ -292,7 +306,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
             </div>
           ) : (
             /* FASE MEMBACA SOAL / TRANSISI: Opsi belum muncul */
-            <div className="p-4 sm:p-6 rounded-2xl bg-slate-900/60 border border-cyan-500/30 backdrop-blur-md text-center flex flex-col items-center justify-center gap-3 animate-fade-in-up">
+            <div className="p-3.5 sm:p-6 rounded-2xl bg-slate-900/60 border border-cyan-500/30 backdrop-blur-md text-center flex flex-col items-center justify-center gap-2.5 sm:gap-3 animate-fade-in-up">
               <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-cyan-300">
                 <span className="relative flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
@@ -308,7 +322,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
               <button
                 id="btn-reveal-options-now"
                 onClick={onRevealOptions}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-bold text-xs sm:text-sm hover:from-cyan-400 hover:to-indigo-500 active:scale-95 shadow-[0_0_18px_rgba(6,182,212,0.4)] transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-bold text-xs sm:text-sm hover:from-cyan-400 hover:to-indigo-500 active:scale-95 shadow-[0_0_18px_rgba(6,182,212,0.4)] transition-all cursor-pointer"
               >
                 <Zap className="w-4 h-4 text-yellow-300" />
                 <span>Tampilkan Opsi Sekarang</span>
@@ -318,7 +332,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
           )}
 
           {/* Keyboard tip footer */}
-          <div className="pt-3 flex items-center justify-between text-[11px] text-slate-400/80">
+          <div className="pt-2 sm:pt-3 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400/80">
             {cardPhase === 'reading' ? (
               <>
                 <span className="hidden sm:inline">Persiapkan diri membaca soal dengan seksama</span>
@@ -401,8 +415,14 @@ export const QuizCard: React.FC<QuizCardProps> = ({
               </div>
 
               {/* Correct text description */}
-              <div className="max-w-xl mx-auto px-4 py-3 rounded-2xl bg-emerald-950/60 border border-emerald-400/30 mt-2 backdrop-blur-md">
-                <p className="text-base sm:text-xl font-bold text-white leading-relaxed">
+              <div className="max-w-xl mx-auto px-4 py-3 rounded-2xl bg-emerald-950/60 border border-emerald-400/30 mt-2 backdrop-blur-md overflow-visible" dir="auto">
+                <p
+                  className={`font-bold text-white harakat-text ${
+                    isArabicText(displayedBackQuestion.options[displayedBackQuestion.correctAnswer])
+                      ? 'font-arabic text-xl sm:text-2xl leading-relaxed'
+                      : 'text-base sm:text-xl leading-relaxed'
+                  }`}
+                >
                   {displayedBackQuestion.options[displayedBackQuestion.correctAnswer]}
                 </p>
               </div>

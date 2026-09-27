@@ -1,6 +1,6 @@
 import React from 'react';
 import { getOwnerBadge } from '../utils/badges';
-import { Crown } from 'lucide-react';
+import { Crown, Star } from 'lucide-react';
 
 interface OwnerBadgeProps {
   badgeId?: string;
@@ -90,6 +90,46 @@ export const OwnerBadge: React.FC<OwnerBadgeProps> = ({
           <span className="bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 bg-clip-text text-transparent font-display leading-none">
             OWNER
           </span>
+        </span>
+      )}
+    </span>
+  );
+};
+
+export interface VipBadgeProps {
+  size?: 'xs' | 'sm' | 'md' | 'lg';
+  showLabel?: boolean;
+  className?: string;
+}
+
+export const VipBadge: React.FC<VipBadgeProps> = ({
+  size = 'sm',
+  showLabel = true,
+  className = '',
+}) => {
+  const sizeClasses = {
+    xs: 'text-[9px] px-1.5 py-0.5 gap-1',
+    sm: 'text-[10px] px-2 py-0.5 gap-1',
+    md: 'text-xs px-2.5 py-0.5 gap-1.5',
+    lg: 'text-sm px-3 py-1 gap-1.5',
+  };
+
+  const starSizes = {
+    xs: 'w-2.5 h-2.5',
+    sm: 'w-3 h-3',
+    md: 'w-3.5 h-3.5',
+    lg: 'w-4 h-4',
+  };
+
+  return (
+    <span
+      className={`inline-flex items-center shrink-0 rounded-full font-bold uppercase tracking-wider bg-purple-950/90 text-amber-300 border border-purple-400/50 shadow-[0_0_10px_rgba(168,85,247,0.35)] select-none hover:scale-105 transition-transform ${sizeClasses[size]} ${className}`}
+      title="Member VIP Wayground"
+    >
+      <Star className={`${starSizes[size]} text-amber-300 fill-amber-300 shrink-0`} />
+      {showLabel && (
+        <span className="font-extrabold tracking-wide text-amber-200 leading-none">
+          VIP
         </span>
       )}
     </span>

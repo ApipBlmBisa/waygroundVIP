@@ -1,5 +1,76 @@
 import React from 'react';
-import { OwnerNameEffect, OwnerNameAnimation } from '../types';
+import { OwnerNameEffect, OwnerNameAnimation, OwnerThemeId } from '../types';
+
+export const OWNER_THEME_CONFIGS: Record<
+  OwnerThemeId,
+  {
+    id: OwnerThemeId;
+    name: string;
+    description: string;
+    cardBgClass: string;
+    borderClass: string;
+    glowClass: string;
+    accentColor: string;
+    accentBadgeClass: string;
+    ambientOrbClass: string;
+  }
+> = {
+  'royal-gold': {
+    id: 'royal-gold',
+    name: 'Royal Gold Theme',
+    description: 'Nuansa emas mewah dengan border & aura berkilau',
+    cardBgClass: 'bg-gradient-to-br from-amber-950/85 via-yellow-950/70 to-slate-950/95',
+    borderClass: 'border-amber-400/60 ring-1 ring-amber-400/40',
+    glowClass: 'shadow-[0_0_30px_rgba(245,158,11,0.35)]',
+    accentColor: '#fbbf24',
+    accentBadgeClass: 'bg-amber-500/20 text-amber-300 border-amber-400/50',
+    ambientOrbClass: 'bg-amber-500/20',
+  },
+  'cyberpunk-void': {
+    id: 'cyberpunk-void',
+    name: 'Cyberpunk Void Theme',
+    description: 'Nuansa gelap futuristik dengan efek garis neon grid',
+    cardBgClass: 'bg-gradient-to-br from-slate-950/95 via-cyan-950/60 to-fuchsia-950/70',
+    borderClass: 'border-cyan-400/60 ring-1 ring-fuchsia-400/40',
+    glowClass: 'shadow-[0_0_30px_rgba(6,182,212,0.35)]',
+    accentColor: '#06b6d4',
+    accentBadgeClass: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/50',
+    ambientOrbClass: 'bg-cyan-500/20',
+  },
+  'galactic-cosmos': {
+    id: 'galactic-cosmos',
+    name: 'Galactic Cosmos Theme',
+    description: 'Nuansa ruang angkasa dengan efek bintang & nebula mini',
+    cardBgClass: 'bg-gradient-to-br from-purple-950/90 via-indigo-950/80 to-slate-950/95',
+    borderClass: 'border-purple-400/60 ring-1 ring-indigo-400/40',
+    glowClass: 'shadow-[0_0_30px_rgba(168,85,247,0.35)]',
+    accentColor: '#a855f7',
+    accentBadgeClass: 'bg-purple-500/20 text-purple-300 border-purple-400/50',
+    ambientOrbClass: 'bg-purple-500/20',
+  },
+  'inferno-lava': {
+    id: 'inferno-lava',
+    name: 'Inferno Lava Theme',
+    description: 'Nuansa api berkobar dengan efek aura merah-oranye',
+    cardBgClass: 'bg-gradient-to-br from-rose-950/85 via-orange-950/75 to-slate-950/95',
+    borderClass: 'border-orange-500/60 ring-1 ring-rose-500/40',
+    glowClass: 'shadow-[0_0_30px_rgba(249,115,22,0.35)]',
+    accentColor: '#f97316',
+    accentBadgeClass: 'bg-orange-500/20 text-orange-300 border-orange-500/50',
+    ambientOrbClass: 'bg-orange-500/20',
+  },
+  'default': {
+    id: 'default',
+    name: 'Default Sovereign',
+    description: 'Nuansa klasik elegan profil Wayground',
+    cardBgClass: 'bg-gradient-to-br from-slate-900/95 via-purple-950/40 to-slate-950/95',
+    borderClass: 'border-slate-700/80',
+    glowClass: 'shadow-xl',
+    accentColor: '#cbd5e1',
+    accentBadgeClass: 'bg-slate-800 text-slate-300 border-slate-700',
+    ambientOrbClass: 'bg-purple-500/10',
+  },
+};
 
 export const OWNER_EFFECT_CONFIGS: Record<
   OwnerNameEffect,
@@ -17,7 +88,7 @@ export const OWNER_EFFECT_CONFIGS: Record<
   'gold-glow': {
     id: 'gold-glow',
     name: 'Gold Glow',
-    description: 'Gradien Emas Neon Berkilau',
+    description: 'Gradien Emas Neon Bersinar',
     gradientClass: 'bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-500 bg-clip-text text-transparent',
     glowColor: 'rgba(245, 158, 11, 0.85)',
     borderGlowClass: 'border-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.3)]',
@@ -27,7 +98,7 @@ export const OWNER_EFFECT_CONFIGS: Record<
   'cyberpunk-rgb': {
     id: 'cyberpunk-rgb',
     name: 'Cyberpunk RGB',
-    description: 'Gradien Neon Cyan-Magenta Futuristik',
+    description: 'Gradien Warna Aurora Neon Futuristik',
     gradientClass: 'bg-gradient-to-r from-fuchsia-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent',
     glowColor: 'rgba(6, 182, 212, 0.85)',
     borderGlowClass: 'border-cyan-400/50 shadow-[0_0_15px_rgba(34,211,238,0.3)]',
@@ -37,7 +108,7 @@ export const OWNER_EFFECT_CONFIGS: Record<
   'fire-lava': {
     id: 'fire-lava',
     name: 'Fire / Lava',
-    description: 'Gradien Kobaran Api Panas Menyala',
+    description: 'Gradien Warna Api Menyala',
     gradientClass: 'bg-gradient-to-r from-yellow-300 via-orange-500 to-red-600 bg-clip-text text-transparent',
     glowColor: 'rgba(239, 68, 68, 0.85)',
     borderGlowClass: 'border-orange-500/50 shadow-[0_0_15px_rgba(249,115,22,0.3)]',
@@ -46,13 +117,33 @@ export const OWNER_EFFECT_CONFIGS: Record<
   },
   'holographic': {
     id: 'holographic',
-    name: 'Holographic Prisma',
-    description: 'Efek Pelangi Holografik Prisma',
+    name: 'Holographic',
+    description: 'Efek Warna Pelangi Holografik Berpindah',
     gradientClass: 'bg-gradient-to-r from-rose-300 via-violet-300 via-teal-200 to-amber-200 bg-clip-text text-transparent',
     glowColor: 'rgba(192, 132, 252, 0.85)',
     borderGlowClass: 'border-purple-400/50 shadow-[0_0_15px_rgba(192,132,252,0.3)]',
     badgePillClass: 'bg-purple-500/20 text-purple-300 border-purple-400/40',
     sampleTextColor: '#c084fc',
+  },
+  'diamond-ice': {
+    id: 'diamond-ice',
+    name: 'Diamond Ice',
+    description: 'Gradien Biru Muda Es Berkilau',
+    gradientClass: 'bg-gradient-to-r from-white via-cyan-200 to-sky-400 bg-clip-text text-transparent',
+    glowColor: 'rgba(56, 189, 248, 0.9)',
+    borderGlowClass: 'border-cyan-300/50 shadow-[0_0_15px_rgba(56,189,248,0.35)]',
+    badgePillClass: 'bg-sky-500/20 text-sky-200 border-sky-400/40',
+    sampleTextColor: '#7dd3fc',
+  },
+  'amethyst-void': {
+    id: 'amethyst-void',
+    name: 'Amethyst Void',
+    description: 'Gradien Ungu Kehitaman Bernuansa Misterius',
+    gradientClass: 'bg-gradient-to-r from-violet-300 via-purple-500 to-indigo-700 bg-clip-text text-transparent',
+    glowColor: 'rgba(168, 85, 247, 0.9)',
+    borderGlowClass: 'border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.35)]',
+    badgePillClass: 'bg-purple-500/20 text-purple-300 border-purple-400/40',
+    sampleTextColor: '#a855f7',
   },
   'emerald-matrix': {
     id: 'emerald-matrix',
@@ -159,30 +250,100 @@ export const OWNER_ANIMATION_CONFIGS: Record<
   'shimmer': {
     id: 'shimmer',
     name: 'Shimmer / Glossy',
-    description: 'Kilauan cahaya bergerak melintasi teks',
+    description: 'Efek kilauan cahaya melintasi teks secara berkala',
     animationClass: 'animate-owner-shimmer',
-    iconSymbol: '✨',
+    iconSymbol: '✦',
   },
   'neon-glow': {
     id: 'neon-glow',
-    name: 'Neon Glow Outer',
-    description: 'Pendaran cahaya neon di luar teks',
+    name: 'Neon Glow Pulse',
+    description: 'Efek pendaran bayangan neon berkedip lembut',
     animationClass: 'animate-owner-neon',
-    iconSymbol: '🌟',
+    iconSymbol: '✺',
   },
   'pulse-wave': {
     id: 'pulse-wave',
     name: 'Text Pulse / Wave',
-    description: 'Efek bergelombang dan berdenyut lembut',
+    description: 'Efek teks bergelombang & berdenyut mengikuti irama',
     animationClass: 'animate-owner-pulse-wave',
-    iconSymbol: '🌊',
+    iconSymbol: '≋',
+  },
+  'flame-flicker': {
+    id: 'flame-flicker',
+    name: 'Flame Flicker',
+    description: 'Efek bayangan bergetar lembut seperti kobaran api',
+    animationClass: 'animate-owner-flame-flicker',
+    iconSymbol: '❖',
+  },
+  'glitch': {
+    id: 'glitch',
+    name: 'Glitch Effect',
+    description: 'Efek teks terdistorsi singkat khas cyberpunk',
+    animationClass: 'animate-owner-glitch',
+    iconSymbol: 'ϟ',
+  },
+  'aurora-flow': {
+    id: 'aurora-flow',
+    name: 'Aurora Flow',
+    description: 'Efek pergeseran spektrum aurora bernapas dinamis',
+    animationClass: 'animate-owner-aurora-flow',
+    iconSymbol: '◎',
+  },
+  'cosmic-sparkle': {
+    id: 'cosmic-sparkle',
+    name: 'Cosmic Sparkle',
+    description: 'Pendaran kerlap-kerlip bintang celestial berkilau',
+    animationClass: 'animate-owner-cosmic-sparkle',
+    iconSymbol: '✧',
+  },
+  'electric-spark': {
+    id: 'electric-spark',
+    name: 'Lightning Bolt',
+    description: 'Sentakan kilat listrik voltase tinggi futuristik',
+    animationClass: 'animate-owner-electric-spark',
+    iconSymbol: '⚡',
+  },
+  'rainbow-cycle': {
+    id: 'rainbow-cycle',
+    name: 'Rainbow Cycle',
+    description: 'Aliran spektrum warna pelangi 360° dinamis',
+    animationClass: 'animate-owner-rainbow-cycle',
+    iconSymbol: '◉',
+  },
+  'floating-levitate': {
+    id: 'floating-levitate',
+    name: 'Floating Levitate',
+    description: 'Efek teks melayang mengambang vertikal lembut',
+    animationClass: 'animate-owner-floating-levitate',
+    iconSymbol: '▲',
+  },
+  'heartbeat-pulse': {
+    id: 'heartbeat-pulse',
+    name: 'Heartbeat Rhythm',
+    description: 'Detak jantung ritmik kinetik bertenaga',
+    animationClass: 'animate-owner-heartbeat-pulse',
+    iconSymbol: '♥',
+  },
+  'neon-breathe': {
+    id: 'neon-breathe',
+    name: 'Deep Neon Breath',
+    description: 'Pendaran napas neon memudar dan menguat elegan',
+    animationClass: 'animate-owner-neon-breathe',
+    iconSymbol: '❂',
+  },
+  'crystal-prism': {
+    id: 'crystal-prism',
+    name: 'Crystal Prism',
+    description: 'Pantulan kilau kristal berlian berkerlip',
+    animationClass: 'animate-owner-crystal-prism',
+    iconSymbol: '⟡',
   },
   'none': {
     id: 'none',
     name: 'Tanpa Animasi',
-    description: 'Tampilan statik jernih',
+    description: 'Tampilan statik jernih elegan',
     animationClass: '',
-    iconSymbol: '⚡',
+    iconSymbol: '—',
   },
 };
 
@@ -221,6 +382,7 @@ export function getDeterministicEffectForUsername(username: string): OwnerNameEf
 export interface OwnerNameTextProps {
   name: string;
   isOwner?: boolean;
+  isVip?: boolean;
   effect?: OwnerNameEffect;
   animation?: OwnerNameAnimation;
   className?: string;
@@ -231,33 +393,52 @@ export interface OwnerNameTextProps {
 export const OwnerNameText: React.FC<OwnerNameTextProps> = ({
   name,
   isOwner = false,
+  isVip = false,
   effect,
   animation,
   className = '',
   style,
   title,
 }) => {
-  // If user has an explicit setting saved per username (and not 'default'), use it.
-  // Otherwise, use a deterministic distinct color based on their username so everyone has distinct colors!
+  const isPrivileged = Boolean(isOwner || isVip);
+
+  // Non-VIP and non-Owner accounts render with classic clean text
+  if (!isPrivileged) {
+    return (
+      <span
+        title={title || `@${name}`}
+        style={style}
+        className={`inline-flex items-center font-bold tracking-normal leading-normal text-white ${className}`}
+      >
+        {name}
+      </span>
+    );
+  }
+
   const effectiveEffect: OwnerNameEffect =
     effect && effect !== 'default'
       ? effect
       : isOwner
       ? 'gold-glow'
-      : getDeterministicEffectForUsername(name);
+      : 'cyberpunk-rgb';
 
-  const effectConfig = OWNER_EFFECT_CONFIGS[effectiveEffect] || OWNER_EFFECT_CONFIGS['cyberpunk-rgb'];
+  const effectConfig = OWNER_EFFECT_CONFIGS[effectiveEffect] || OWNER_EFFECT_CONFIGS[isOwner ? 'gold-glow' : 'cyberpunk-rgb'];
   const effectiveAnim = animation || (isOwner ? 'shimmer' : 'none');
   const animConfig = OWNER_ANIMATION_CONFIGS[effectiveAnim] || OWNER_ANIMATION_CONFIGS['none'];
 
   return (
     <span
-      title={title || `@${name}${isOwner ? ' (Owner)' : ''}`}
+      title={title || `@${name}${isOwner ? ' (Owner)' : ' (VIP)'}`}
       style={{
         ['--owner-glow-color' as any]: effectConfig.glowColor,
+        WebkitBackgroundClip: 'text',
+        backgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        boxDecorationBreak: 'clone',
+        WebkitBoxDecorationBreak: 'clone',
         ...style,
       }}
-      className={`inline-block font-black tracking-tight ${effectConfig.gradientClass} ${animConfig.animationClass} ${className}`}
+      className={`inline-flex items-center font-extrabold tracking-normal leading-normal py-0.5 ${effectConfig.gradientClass} ${animConfig.animationClass} ${className}`}
     >
       {name}
     </span>

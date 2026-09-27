@@ -26,7 +26,7 @@ import { UserProfileSetup } from './components/UserProfileSetup';
 import { UserProfileModal } from './components/UserProfileModal';
 import { GlobalLeaderboardModal } from './components/GlobalLeaderboardModal';
 import { UserAvatar } from './components/UserAvatar';
-import { OwnerBadge } from './components/OwnerBadge';
+import { OwnerBadge, VipBadge } from './components/OwnerBadge';
 import { OwnerNameText } from './components/OwnerNameText';
 import { OwnerCustomizationModal } from './components/OwnerCustomizationModal';
 import { getOwnerBadge } from './utils/badges';
@@ -55,6 +55,7 @@ import {
   Home,
   Sparkles,
   Crown,
+  Star,
 } from 'lucide-react';
 
 export default function App() {
@@ -144,6 +145,20 @@ export default function App() {
       }
     }
   }, [isLocked]);
+
+  // Ensure Owner-only theme is not active if user is not Owner and not VIP
+  useEffect(() => {
+    const preset = getThemePreset(settings.themeId);
+    if (preset.isOwnerOnly) {
+      const hasPrivilege = Boolean(currentUser?.isOwner || currentUser?.isVip);
+      if (!hasPrivilege) {
+        setSettings((prev) => ({
+          ...prev,
+          themeId: 'cyber-purple',
+        }));
+      }
+    }
+  }, [currentUser, settings.themeId]);
 
   // Record Tryout Results automatically upon finishing
   useEffect(() => {
@@ -567,19 +582,19 @@ export default function App() {
       {/* ========================================================= */}
       {/* TOP NAVIGATION BAR                                         */}
       {/* ========================================================= */}
-      <header className="w-full border-b border-white/10 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
+      <header className="w-full border-b border-white/10 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-2 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-1.5 sm:gap-2">
           {/* Logo & App Name */}
           <div
             onClick={handleChangeQuiz}
-            className="flex items-center gap-3 cursor-pointer select-none group shrink-0"
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none group shrink-0"
           >
-            <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${currentTheme.actionBtnGradient} p-0.5 ${currentTheme.accentGlowClass} group-hover:scale-105 transition-transform`}>
-              <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
-                <Cat className={`w-5 h-5 ${currentTheme.accentClass} group-hover:rotate-12 transition-transform duration-300`} />
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br ${currentTheme.actionBtnGradient} p-0.5 ${currentTheme.accentGlowClass} group-hover:scale-105 transition-transform`}>
+              <div className="w-full h-full bg-slate-950 rounded-[10px] sm:rounded-[14px] flex items-center justify-center">
+                <Cat className={`w-4 h-4 sm:w-5 sm:h-5 ${currentTheme.accentClass} group-hover:rotate-12 transition-transform duration-300`} />
               </div>
             </div>
-            <div className="hidden sm:block">
+            <div className="hidden md:block">
               <span className="font-black text-lg sm:text-xl text-white tracking-tight flex items-center gap-1.5 font-display">
                 WAYGROUND
               </span>
@@ -590,39 +605,39 @@ export default function App() {
           </div>
 
           {/* Mode Switcher Tabs (Tryout Solo vs PvP Online) */}
-          <div className="flex items-center bg-slate-900/90 p-1 rounded-2xl border border-white/10 shadow-inner">
+          <div className="flex items-center bg-slate-900/90 p-0.5 sm:p-1 rounded-xl sm:rounded-2xl border border-white/10 shadow-inner">
             <button
               onClick={() => setAppMode('tryout')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
                 appMode === 'tryout'
                   ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>Tryout</span>
+              <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <span>Solo</span>
             </button>
             <button
               onClick={() => setAppMode('pvp')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
                 appMode === 'pvp'
                   ? 'bg-gradient-to-r from-amber-500 to-rose-600 text-white shadow-md'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <Swords className="w-3.5 h-3.5" />
-              <span>PvP Online</span>
+              <Swords className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <span>PvP</span>
             </button>
           </div>
 
           {/* Right Header Controls */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Solo Pause/Back (only when playing Tryout) */}
             {appMode === 'tryout' && quizState === 'playing' && (
               <>
                 <button
                   onClick={() => setIsPaused(!isPaused)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                  className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                     isPaused
                       ? 'bg-amber-500/20 border-amber-400/40 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.3)] animate-pulse'
                       : 'bg-slate-900/60 border-slate-700 text-slate-300 hover:text-white'
@@ -634,7 +649,7 @@ export default function App() {
 
                 <button
                   onClick={handleChangeQuiz}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/60 hover:bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition-all cursor-pointer"
+                  className="flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-slate-900/60 hover:bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition-all cursor-pointer"
                   title="Kembali ke Menu Soal"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
@@ -647,7 +662,7 @@ export default function App() {
               <button
                 id="header-btn-results-lobby"
                 onClick={handleChangeQuiz}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200 hover:text-white transition-all cursor-pointer shadow-sm"
+                className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200 hover:text-white transition-all cursor-pointer shadow-sm"
                 title="Kembali ke Lobby / Menu Soal"
               >
                 <Home className="w-3.5 h-3.5 text-purple-400" />
@@ -658,18 +673,18 @@ export default function App() {
             {/* Global Leaderboard Button */}
             <button
               onClick={() => setShowLeaderboardModal(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-amber-500/40 bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 text-xs font-bold transition-all cursor-pointer shadow-sm"
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-amber-500/40 bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 text-xs font-bold transition-all cursor-pointer shadow-sm"
               title="Papan Peringkat Global & Statistik Publik"
             >
               <Trophy className="w-3.5 h-3.5 text-amber-400" />
               <span className="hidden lg:inline">Leaderboard</span>
             </button>
 
-            {/* Quick Owner / Name Customizer Button */}
+            {/* Quick Owner / VIP / Regular Custom Name Button */}
             {currentUser.isOwner ? (
               <button
                 onClick={() => setShowOwnerCustomizer(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-amber-400/60 bg-gradient-to-r from-amber-950/90 via-amber-900/60 to-yellow-950/90 hover:from-amber-900/80 hover:to-yellow-850/80 text-amber-200 text-xs font-bold transition-all cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.35)] hover:shadow-[0_0_20px_rgba(251,191,36,0.55)] hover:scale-105 active:scale-95 group"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-amber-400/60 bg-gradient-to-r from-amber-950/90 via-amber-900/60 to-yellow-950/90 hover:from-amber-900/80 hover:to-yellow-900/80 text-amber-200 text-xs font-bold transition-all cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.35)] hover:shadow-[0_0_20px_rgba(251,191,36,0.55)] hover:scale-105 active:scale-95 group"
                 title="Buka Pengaturan Nama & Badge Eksklusif Owner"
               >
                 <Crown className="w-3.5 h-3.5 text-amber-300 fill-amber-400/30 drop-shadow-[0_0_6px_rgba(251,191,36,0.9)] group-hover:rotate-6 transition-transform" />
@@ -677,15 +692,26 @@ export default function App() {
                   Gaya Owner
                 </span>
               </button>
+            ) : currentUser.isVip ? (
+              <button
+                onClick={() => setShowOwnerCustomizer(true)}
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-purple-400/60 bg-gradient-to-r from-purple-950/90 via-indigo-950/60 to-purple-900/60 hover:from-purple-900/80 hover:to-indigo-850/80 text-purple-200 text-xs font-bold transition-all cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.35)] hover:shadow-[0_0_20px_rgba(168,85,247,0.55)] hover:scale-105 active:scale-95 group"
+                title="Buka Pengaturan Warna Nama VIP Anda"
+              >
+                <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300/40 drop-shadow-[0_0_6px_rgba(245,158,11,0.9)] group-hover:rotate-12 transition-transform" />
+                <span className="hidden xl:inline font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-amber-200 to-purple-300">
+                  Warna VIP
+                </span>
+              </button>
             ) : (
               <button
                 onClick={() => setShowOwnerCustomizer(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 text-xs font-bold transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95 group"
-                title="Buka Pengaturan Warna & Gaya Nama Anda"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-950/40 hover:bg-indigo-900/60 text-indigo-300 text-xs font-bold transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95 group"
+                title="Kustomisasi Nama & Gaya Profil Anda"
               >
-                <Palette className="w-3.5 h-3.5 text-purple-400 group-hover:rotate-12 transition-transform" />
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400 group-hover:rotate-12 transition-transform" />
                 <span className="hidden xl:inline font-bold">
-                  Warna Nama
+                  Kustom Nama
                 </span>
               </button>
             )}
@@ -693,9 +719,11 @@ export default function App() {
             {/* User Profile Pill Button - Perfectly aligned with OwnerBadge and OwnerNameText */}
             <button
               onClick={() => setShowProfileModal(true)}
-              className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer hover:brightness-125 ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border transition-all cursor-pointer hover:brightness-125 ${
                 currentUser.isOwner
                   ? 'bg-gradient-to-r from-amber-950/70 via-slate-900 to-amber-950/50 border-amber-400/60 shadow-[0_0_15px_rgba(251,191,36,0.25)] hover:border-amber-300'
+                  : currentUser.isVip
+                  ? 'bg-gradient-to-r from-purple-950/70 via-slate-900 to-indigo-950/50 border-purple-400/60 shadow-[0_0_15px_rgba(168,85,247,0.2)] hover:border-purple-300'
                   : `${currentTheme.badgeBgClass} ${currentTheme.cardBorderHighlight}`
               }`}
               title="Buka Profil & Statistik Riwayat Anda"
@@ -710,40 +738,43 @@ export default function App() {
                 />
               </div>
 
-              {/* Seamless horizontal alignment of Name & Owner Badge */}
-              <div className="flex items-center gap-1.5 min-w-0">
+              {/* Seamless horizontal alignment of Name & Owner/VIP Badge */}
+              <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
                 <OwnerNameText
                   name={currentUser.displayName || `@${currentUser.username}`}
                   isOwner={currentUser.isOwner}
+                  isVip={currentUser.isVip}
                   effect={currentUser.ownerNameEffect}
                   animation={currentUser.ownerNameAnimation}
-                  className="text-xs font-bold truncate max-w-[85px] sm:max-w-[125px] leading-tight"
+                  className="text-xs font-bold truncate max-w-[85px] sm:max-w-[140px] leading-normal"
                 />
 
-                {currentUser.isOwner && (
+                {currentUser.isOwner ? (
                   <OwnerBadge
                     isOwner={true}
                     badgeId={currentUser.activeBadgeId}
                     size="xs"
                     showLabel
                   />
-                )}
+                ) : currentUser.isVip ? (
+                  <VipBadge size="xs" showLabel={false} />
+                ) : null}
               </div>
             </button>
 
-            {/* Theme Selector Button */}
+            {/* Theme Selector Button (Distinct from Custom Name) */}
             <button
               onClick={() => setShowThemeModal(true)}
-              className={`p-2 rounded-xl text-xs font-bold transition-all cursor-pointer hover:bg-slate-800/60 hover:brightness-125`}
-              title={`Ganti Tema Warna (Saat ini: ${currentTheme.name})`}
+              className="p-1.5 sm:p-2 rounded-xl border border-slate-700/80 bg-slate-900/70 hover:bg-slate-800 text-xs font-bold transition-all cursor-pointer hover:border-cyan-400/50 hover:brightness-125"
+              title={`Ganti Tema Warna Kuis (Saat ini: ${currentTheme.name})`}
             >
-              <Palette className="w-3.5 h-3.5" />
+              <Palette className="w-3.5 h-3.5 text-cyan-400" />
             </button>
 
             {/* Sound Toggle */}
             <button
               onClick={() => setSettings(prev => ({ ...prev, soundEnabled: !prev.soundEnabled }))}
-              className={`p-2 rounded-xl border transition-all cursor-pointer ${
+              className={`p-1.5 sm:p-2 rounded-xl border transition-all cursor-pointer ${
                 settings.soundEnabled
                   ? `${currentTheme.badgeBgClass} ${currentTheme.accentGlowClass}`
                   : 'bg-slate-900/60 border-slate-800 text-slate-500'
@@ -751,9 +782,9 @@ export default function App() {
               title={settings.soundEnabled ? 'Matikan Suara Efek' : 'Nyalakan Suara Efek'}
             >
               {settings.soundEnabled ? (
-                <Volume2 className={`w-4 h-4 ${currentTheme.accentClass}`} />
+                <Volume2 className={`w-3.5 h-3.5 ${currentTheme.accentClass}`} />
               ) : (
-                <VolumeX className="w-4 h-4" />
+                <VolumeX className="w-3.5 h-3.5" />
               )}
             </button>
 
@@ -884,8 +915,8 @@ export default function App() {
         />
       )}
 
-      {/* Owner Customization Modal (Exclusive Name & Badge Customization) */}
-      {showOwnerCustomizer && currentUser && currentUser.isOwner && (
+      {/* Custom Name, VIP & Owner Customization Modal */}
+      {showOwnerCustomizer && currentUser && (
         <OwnerCustomizationModal
           isOpen={showOwnerCustomizer}
           onClose={() => setShowOwnerCustomizer(false)}
@@ -912,6 +943,9 @@ export default function App() {
         settings={settings}
         onUpdateSettings={setSettings}
         isOwner={currentUser?.isOwner}
+        isVip={currentUser?.isVip}
+        currentUsername={currentUser?.username}
+        onVipActivated={(updated) => setCurrentUser(updated)}
       />
 
       {/* Security & Password Management Modal */}

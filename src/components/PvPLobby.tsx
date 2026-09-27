@@ -5,7 +5,7 @@ import { PvPWebSocketManager, fetchActiveRooms, createPvPRoom } from '../utils/a
 import { prepareQuizQuestions } from '../utils/quizUtils';
 import { PvPGameView } from './PvPGameView';
 import { UserAvatar } from './UserAvatar';
-import { OwnerBadge } from './OwnerBadge';
+import { OwnerBadge, VipBadge } from './OwnerBadge';
 import { OwnerNameText } from './OwnerNameText';
 import {
   Swords,
@@ -68,7 +68,7 @@ export const PvPLobby: React.FC<PvPLobbyProps> = ({
 
   // Chat in Lobby
   const [chatMessages, setChatMessages] = useState<
-    { username: string; avatar: string; message: string; timestamp: string; isOwner?: boolean; activeBadgeId?: string }[]
+    { username: string; avatar: string; message: string; timestamp: string; isOwner?: boolean; isVip?: boolean; activeBadgeId?: string }[]
   >([]);
   const [chatInput, setChatInput] = useState('');
 
@@ -90,6 +90,7 @@ export const PvPLobby: React.FC<PvPLobbyProps> = ({
             message: data.message,
             timestamp: data.timestamp,
             isOwner: data.isOwner,
+            isVip: data.isVip,
             activeBadgeId: data.activeBadgeId,
             ownerNameEffect: data.ownerNameEffect,
             ownerNameAnimation: data.ownerNameAnimation,
@@ -128,6 +129,7 @@ export const PvPLobby: React.FC<PvPLobbyProps> = ({
       username: currentUser.username,
       avatar: currentUser.avatar,
       isOwner: currentUser.isOwner,
+      isVip: currentUser.isVip,
       activeBadgeId: currentUser.activeBadgeId,
       ownerNameEffect: currentUser.ownerNameEffect,
       ownerNameAnimation: currentUser.ownerNameAnimation,
@@ -185,6 +187,7 @@ export const PvPLobby: React.FC<PvPLobbyProps> = ({
         username: currentUser.username,
         avatar: currentUser.avatar,
         isOwner: currentUser.isOwner,
+        isVip: currentUser.isVip,
         activeBadgeId: currentUser.activeBadgeId,
         ownerNameEffect: currentUser.ownerNameEffect,
         ownerNameAnimation: currentUser.ownerNameAnimation,
@@ -225,6 +228,7 @@ export const PvPLobby: React.FC<PvPLobbyProps> = ({
       username: currentUser.username,
       avatar: currentUser.avatar,
       isOwner: currentUser.isOwner,
+      isVip: currentUser.isVip,
       activeBadgeId: currentUser.activeBadgeId,
       ownerNameEffect: currentUser.ownerNameEffect,
       ownerNameAnimation: currentUser.ownerNameAnimation,
@@ -344,18 +348,21 @@ export const PvPLobby: React.FC<PvPLobbyProps> = ({
                           <OwnerNameText
                             name={`@${player.username}`}
                             isOwner={player.isOwner}
+                            isVip={player.isVip}
                             effect={player.ownerNameEffect}
                             animation={player.ownerNameAnimation}
                             className="text-sm font-bold"
                           />
-                          {player.isOwner && (
+                          {player.isOwner ? (
                             <OwnerBadge
                               isOwner={true}
                               badgeId={player.activeBadgeId}
                               size="xs"
                               showLabel
                             />
-                          )}
+                          ) : player.isVip ? (
+                            <VipBadge size="xs" showLabel />
+                          ) : null}
                           {isMe && (
                             <span className={`px-1.5 py-0.2 rounded bg-gradient-to-r ${currentTheme.actionBtnGradient} text-[9px] font-bold text-white uppercase`}>
                               Anda
@@ -445,18 +452,21 @@ export const PvPLobby: React.FC<PvPLobbyProps> = ({
                       <OwnerNameText
                         name={`@${msg.username}`}
                         isOwner={msg.isOwner}
+                        isVip={msg.isVip}
                         effect={msg.ownerNameEffect}
                         animation={msg.ownerNameAnimation}
                         className="font-bold font-mono text-[11px]"
                       />
-                      {msg.isOwner && (
+                      {msg.isOwner ? (
                         <OwnerBadge
                           isOwner={true}
                           badgeId={msg.activeBadgeId}
                           size="xs"
                           showLabel
                         />
-                      )}
+                      ) : msg.isVip ? (
+                        <VipBadge size="xs" showLabel />
+                      ) : null}
                       <span className="text-[9px] text-slate-500 ml-auto">{msg.timestamp}</span>
                     </div>
                     <p className="text-slate-200 pl-5 leading-relaxed bg-slate-950/40 p-1.5 rounded-lg border border-slate-800/60">

@@ -3,9 +3,10 @@ import { FlashcardQuestion, PvPRoom, PvPRoomPlayer, UserProfile, ThemeId } from 
 import { ThemePreset, getThemePreset } from '../utils/themes';
 import { PvPWebSocketManager } from '../utils/api';
 import { UserAvatar } from './UserAvatar';
-import { OwnerBadge } from './OwnerBadge';
+import { OwnerBadge, VipBadge } from './OwnerBadge';
 import { OwnerNameText } from './OwnerNameText';
 import { soundManager } from '../utils/audio';
+import { isArabicText } from '../utils/excelParser';
 import confetti from 'canvas-confetti';
 import {
   Trophy,
@@ -479,25 +480,23 @@ export const PvPGameView: React.FC<PvPGameViewProps> = ({
                 <span className="w-6 h-6 rounded-full bg-slate-600 text-white text-xs font-black flex items-center justify-center mb-1">
                   2
                 </span>
-                <div className="my-1 relative">
+                <div className="my-1">
                   <UserAvatar avatar={finalResults[1].avatar} size="md" />
-                  {finalResults[1].isOwner && (
-                    <div className="absolute -bottom-1 -right-1">
-                      <OwnerBadge isOwner={true} badgeId={finalResults[1].activeBadgeId} size="xs" glow />
-                    </div>
-                  )}
                 </div>
                 <div className="flex items-center justify-center gap-1 max-w-full flex-wrap">
                   <OwnerNameText
                     name={finalResults[1].username}
                     isOwner={finalResults[1].isOwner}
+                    isVip={finalResults[1].isVip}
                     effect={finalResults[1].ownerNameEffect}
                     animation={finalResults[1].ownerNameAnimation}
                     className="text-xs font-bold truncate max-w-full"
                   />
-                  {finalResults[1].isOwner && (
+                  {finalResults[1].isOwner ? (
                     <OwnerBadge isOwner={true} badgeId={finalResults[1].activeBadgeId} size="xs" showLabel />
-                  )}
+                  ) : finalResults[1].isVip ? (
+                    <VipBadge size="xs" showLabel />
+                  ) : null}
                 </div>
                 <span className="text-xs font-black text-cyan-400 mt-1">
                   {finalResults[1].score} pt
@@ -516,25 +515,23 @@ export const PvPGameView: React.FC<PvPGameViewProps> = ({
                 <span className="w-7 h-7 rounded-full bg-amber-400 text-slate-950 text-xs font-black flex items-center justify-center mb-1 shadow">
                   1
                 </span>
-                <div className="my-1 relative">
+                <div className="my-1">
                   <UserAvatar avatar={finalResults[0].avatar} size="lg" />
-                  {finalResults[0].isOwner && (
-                    <div className="absolute -bottom-1.5 -right-1.5">
-                      <OwnerBadge isOwner={true} badgeId={finalResults[0].activeBadgeId} size="sm" glow />
-                    </div>
-                  )}
                 </div>
                 <div className="flex items-center justify-center gap-1 max-w-full flex-wrap">
                   <OwnerNameText
                     name={finalResults[0].username}
                     isOwner={finalResults[0].isOwner}
+                    isVip={finalResults[0].isVip}
                     effect={finalResults[0].ownerNameEffect}
                     animation={finalResults[0].ownerNameAnimation}
                     className="text-sm font-black truncate max-w-full"
                   />
-                  {finalResults[0].isOwner && (
+                  {finalResults[0].isOwner ? (
                     <OwnerBadge isOwner={true} badgeId={finalResults[0].activeBadgeId} size="xs" showLabel />
-                  )}
+                  ) : finalResults[0].isVip ? (
+                    <VipBadge size="xs" showLabel />
+                  ) : null}
                 </div>
                 <span className="text-sm font-black text-amber-400 mt-1">
                   {finalResults[0].score} pt
@@ -552,25 +549,23 @@ export const PvPGameView: React.FC<PvPGameViewProps> = ({
                 <span className="w-6 h-6 rounded-full bg-amber-800 text-amber-100 text-xs font-black flex items-center justify-center mb-1">
                   3
                 </span>
-                <div className="my-1 relative">
+                <div className="my-1">
                   <UserAvatar avatar={finalResults[2].avatar} size="md" />
-                  {finalResults[2].isOwner && (
-                    <div className="absolute -bottom-1 -right-1">
-                      <OwnerBadge isOwner={true} badgeId={finalResults[2].activeBadgeId} size="xs" glow />
-                    </div>
-                  )}
                 </div>
                 <div className="flex items-center justify-center gap-1 max-w-full flex-wrap">
                   <OwnerNameText
                     name={finalResults[2].username}
                     isOwner={finalResults[2].isOwner}
+                    isVip={finalResults[2].isVip}
                     effect={finalResults[2].ownerNameEffect}
                     animation={finalResults[2].ownerNameAnimation}
                     className="text-xs font-bold truncate max-w-full"
                   />
-                  {finalResults[2].isOwner && (
+                  {finalResults[2].isOwner ? (
                     <OwnerBadge isOwner={true} badgeId={finalResults[2].activeBadgeId} size="xs" showLabel />
-                  )}
+                  ) : finalResults[2].isVip ? (
+                    <VipBadge size="xs" showLabel />
+                  ) : null}
                 </div>
                 <span className="text-xs font-black text-cyan-400 mt-1">
                   {finalResults[2].score} pt
@@ -622,18 +617,21 @@ export const PvPGameView: React.FC<PvPGameViewProps> = ({
                         <OwnerNameText
                           name={player.username}
                           isOwner={player.isOwner}
+                          isVip={player.isVip}
                           effect={player.ownerNameEffect}
                           animation={player.ownerNameAnimation}
                           className="text-sm font-bold"
                         />
-                        {player.isOwner && (
+                        {player.isOwner ? (
                           <OwnerBadge
                             isOwner={true}
                             badgeId={player.activeBadgeId}
                             size="xs"
                             showLabel
                           />
-                        )}
+                        ) : player.isVip ? (
+                          <VipBadge size="xs" showLabel />
+                        ) : null}
                         {isMe && (
                           <span className="px-1.5 py-0.2 rounded bg-purple-600 text-[9px] font-bold text-white uppercase">
                             Anda
@@ -763,9 +761,11 @@ export const PvPGameView: React.FC<PvPGameViewProps> = ({
                   <span className="text-[11px] font-semibold truncate max-w-[55px] sm:max-w-[80px]">
                     @{s.username}
                   </span>
-                  {s.isOwner && (
+                  {s.isOwner ? (
                     <OwnerBadge isOwner={true} badgeId={s.activeBadgeId} size="xs" showLabel />
-                  )}
+                  ) : s.isVip ? (
+                    <VipBadge size="xs" showLabel={false} />
+                  ) : null}
                   <span className="text-[10px] text-amber-400 font-black font-mono">{s.score}</span>
                 </div>
               );
@@ -882,12 +882,17 @@ export const PvPGameView: React.FC<PvPGameViewProps> = ({
 
             {/* Question Text in Center-Top */}
             {currentQuestion && (
-              <div className="my-auto py-6 px-2 sm:px-6 flex flex-col items-center justify-center text-center">
-                <span className="text-xs tracking-widest text-indigo-300/80 uppercase font-semibold mb-3 flex items-center gap-1.5 font-display">
+              <div className="my-auto py-3 sm:py-6 px-1 sm:px-6 flex flex-col items-center justify-center text-center">
+                <span className="text-[10px] sm:text-xs tracking-widest text-indigo-300/80 uppercase font-semibold mb-2 sm:mb-3 flex items-center gap-1.5 font-display">
                   <HelpCircle className="w-3.5 h-3.5 text-indigo-400" />
                   Pertanyaan Kuis
                 </span>
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-relaxed max-w-2xl drop-shadow-md font-display">
+                <h2
+                  dir="auto"
+                  className={`text-lg sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-relaxed max-w-2xl drop-shadow-md break-words ${
+                    isArabicText(currentQuestion.question) ? 'font-arabic text-xl sm:text-3xl py-1' : 'font-display'
+                  }`}
+                >
                   {currentQuestion.question}
                 </h2>
               </div>
@@ -896,9 +901,10 @@ export const PvPGameView: React.FC<PvPGameViewProps> = ({
             {/* Bottom Area: Phase 1 (Reading prompt) vs Phase 2 (2x2 Answer Grid) */}
             {cardPhase === 'answering' ? (
               /* FASE MENJAWAB: 2x2 Answer Options Grid muncul */
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 pt-2 animate-fade-in-up">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4 pt-2 animate-fade-in-up">
                 {optionsList.map((opt, idx) => {
                   const style = OPTION_STYLES[opt.key];
+                  const isArabicOpt = isArabicText(opt.text);
                   return (
                     <button
                       key={opt.key}
@@ -907,18 +913,24 @@ export const PvPGameView: React.FC<PvPGameViewProps> = ({
                         e.stopPropagation();
                         handleAnswerSelect(opt.key);
                       }}
-                      className={`group relative flex items-center p-4 sm:p-5 min-h-[76px] sm:min-h-[84px] rounded-2xl bg-slate-900/75 backdrop-blur-md border ${style.border} ${style.hover} text-left transition-all duration-200 active:scale-[0.98] cursor-pointer shadow-md`}
+                      className={`group relative flex items-center p-3 sm:p-4 md:p-5 min-h-[58px] sm:min-h-[74px] md:min-h-[82px] rounded-xl sm:rounded-2xl bg-slate-900/75 backdrop-blur-md border ${style.border} ${style.hover} text-left transition-all duration-200 active:scale-[0.98] cursor-pointer shadow-md`}
                     >
                       {/* Option Badge (A, B, C, D) */}
                       <div
-                        className={`shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${style.badgeBg} ${style.badgeText} flex items-center justify-center font-black text-lg sm:text-xl shadow-md group-hover:scale-110 transition-transform duration-200 mr-3.5`}
+                        className={`shrink-0 w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-xl sm:rounded-2xl ${style.badgeBg} ${style.badgeText} flex items-center justify-center font-black text-base sm:text-lg md:text-xl shadow-md group-hover:scale-110 transition-transform duration-200 mr-3 sm:mr-3.5`}
                       >
                         {opt.key}
                       </div>
 
-                      {/* Option Text */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm sm:text-base md:text-lg font-bold text-slate-100 group-hover:text-white leading-snug">
+                      {/* Option Text (Supporting Arabic Harakat & Clean Numbers) */}
+                      <div className="flex-1 min-w-0 overflow-visible py-0.5" dir="auto">
+                        <p
+                          className={`font-bold text-slate-100 group-hover:text-white harakat-text break-words ${
+                            isArabicOpt
+                              ? 'font-arabic text-base sm:text-lg md:text-xl leading-relaxed'
+                              : 'text-sm sm:text-base md:text-lg leading-snug'
+                          }`}
+                        >
                           {opt.text}
                         </p>
                       </div>

@@ -80,6 +80,7 @@ export async function updateOwnerStyle(
   username: string,
   params: {
     displayName?: string;
+    ownerThemeId?: string;
     ownerNameEffect?: string;
     ownerNameAnimation?: string;
     activeBadgeId?: string;
@@ -94,6 +95,66 @@ export async function updateOwnerStyle(
     return await res.json();
   } catch (err) {
     return { success: false, message: 'Gagal menyimpan kustomisasi Owner ke database' };
+  }
+}
+
+export async function activateVipStatus(
+  username: string,
+  passCode?: string
+): Promise<{ success: boolean; user?: UserProfile; message?: string }> {
+  try {
+    const res = await fetch('/api/users/toggle-vip', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, passCode }),
+    });
+    return await res.json();
+  } catch (err) {
+    return { success: false, message: 'Gagal mengaktifkan VIP' };
+  }
+}
+
+export async function toggleUserVipByOwner(
+  ownerUsername: string,
+  targetUsername: string,
+  grantVip: boolean
+): Promise<{ success: boolean; user?: UserProfile; message?: string }> {
+  try {
+    const res = await fetch('/api/users/toggle-vip', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: ownerUsername, targetUsername, grantVip }),
+    });
+    return await res.json();
+  } catch (err) {
+    return { success: false, message: 'Gagal mengubah status VIP pengguna' };
+  }
+}
+
+export async function fetchVipPassword(
+  ownerUsername: string
+): Promise<{ success: boolean; vipPassword?: string; message?: string }> {
+  try {
+    const res = await fetch(`/api/vip/password?username=${encodeURIComponent(ownerUsername)}`);
+    return await res.json();
+  } catch (err) {
+    return { success: false, message: 'Gagal memuat password VIP' };
+  }
+}
+
+export async function updateVipPassword(
+  ownerUsername: string,
+  newPassword: string
+): Promise<{ success: boolean; vipPassword?: string; message?: string }> {
+  try {
+    const res = await fetch('/api/vip/password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: ownerUsername, newPassword }),
+    });
+    return await res.json();
+  } catch (err) {
+    return { success: false, message: 'Gagal memperbarui password VIP' };
   }
 }
 
@@ -131,6 +192,18 @@ export async function fetchGlobalLeaderboard(): Promise<{ success: boolean; lead
     return await res.json();
   } catch {
     return { success: false, leaderboard: [] };
+  }
+}
+
+export async function cleanDemoLeaderboardData(): Promise<{ success: boolean; message?: string }> {
+  try {
+    const res = await fetch('/api/admin/clean-demo-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return await res.json();
+  } catch {
+    return { success: false, message: 'Gagal menghubungi server' };
   }
 }
 

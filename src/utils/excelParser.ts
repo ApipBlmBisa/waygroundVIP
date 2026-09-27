@@ -18,6 +18,60 @@ function findKeyValue(row: Record<string, unknown>, possibleKeys: string[]): str
 }
 
 /**
+ * Checks if a string contains Arabic characters or diacritics
+ */
+export function isArabicText(text: string): boolean {
+  if (!text) return false;
+  return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text);
+}
+
+/**
+ * Normalizes Arabic text and ensures isolated diacritical marks (harakat)
+ * have an appropriate carrier (such as tatweel 'ـ' or dotted circle)
+ * so that harakat are visibly rendered instead of collapsing or disappearing.
+ */
+export function normalizeHarakatText(text: string): string {
+  if (!text) return '';
+  const trimmed = text.trim();
+
+  // Arabic combining diacritical marks range:
+  // \u064B (fathatan) to \u065F (wavy hamza below), \u0670 (superscript alef)
+  const isOnlyDiacritics = /^[\u064B-\u065F\u0670\s]+$/.test(trimmed);
+  if (isOnlyDiacritics) {
+    // Isolated harakat with no base letter - attach a tatweel carrier 'ـ'
+    // E.g. 'ـَ' so the harakat is clearly floating on a visible baseline
+    return `ـ${trimmed.trim()}`;
+  }
+
+  return trimmed;
+}
+
+/**
+ * Clean option text while preserving numbers, mathematical expressions,
+ * and Arabic harakat / diacritics.
+ */
+export function cleanOptionText(text: string): string {
+  if (!text) return '';
+  const raw = String(text).trim();
+  if (!raw) return '';
+
+  // CRITICAL FIX: NEVER strip digits (1-4, 0-9, or Arabic numerals) as they are part of test content
+  // (e.g. "1. َ", "1 dan 2", "1. Fathah", "2. Kasrah", etc.).
+  // ONLY strip option letter prefixes like "A. ", "B) ", "(C) ", "D - ", "a. "
+  // and ONLY if there is actual remaining text after the prefix.
+  const prefixRegex = /^(\s*(\(|\[)?[A-Da-d](\)|\.|\:|\-)\s+)/;
+  let cleaned = raw;
+  if (prefixRegex.test(raw)) {
+    const candidate = raw.replace(prefixRegex, '').trim();
+    if (candidate.length > 0) {
+      cleaned = candidate;
+    }
+  }
+
+  return normalizeHarakatText(cleaned);
+}
+
+/**
  * Parse Excel (.xlsx, .xls, .csv) file content into FlashcardQuestion array
  */
 export async function parseExcelQuizFile(file: File): Promise<FlashcardQuestion[]> {
@@ -38,16 +92,6 @@ export async function parseExcelQuizFile(file: File): Promise<FlashcardQuestion[
   }
 
   const questions: FlashcardQuestion[] = [];
-
-  const cleanOptionText = (text: string): string => {
-    if (!text) return '';
-    // Strip leading "A. ", "B. ", "A) ", "(A) ", "A - " etc. so shuffled options display cleanly.
-    // Only strips a bare letter A-D (optionally wrapped in ( ) or [ ]) followed by ) . : or -
-    // Requires a delimiter character (not just whitespace) so real answer text that happens to
-    // start with a number/letter (e.g. "2 Hijriah", "4 harakat", "1 : 1") is left untouched.
-    const cleaned = text.replace(/^\s*(\(|\[)?[A-Da-d](\)|\.|\:|\-)\s*/, '').trim();
-    return cleaned || text.trim();
-  };
 
   rawRows.forEach((row, index) => {
     const questionText = findKeyValue(row, ['Pertanyaan', 'Question', 'Soal', 'Teks Soal']);
@@ -306,6 +350,56 @@ export const SAMPLE_PRESET_QUIZZES: { title: string; desc: string; questions: Fl
           D: 'PHP',
         },
         correctAnswer: 'B',
+      },
+    ],
+  },
+  {
+    title: 'Kuis Huruf Hijaiyah & Tanda Harakat',
+    desc: '4 Soal tanda baca harakat Arab lengkap dengan angka pilihan',
+    questions: [
+      {
+        id: 'sample-arab-1',
+        question: 'Manakah tanda harakat yang menghasilkan bunyi vokal "A" (Fathah)?',
+        options: {
+          A: '1. َ (Fathah)',
+          B: '2. ِ (Kasrah)',
+          C: '3. ُ (Dhammah)',
+          D: '4. ْ (Sukun)',
+        },
+        correctAnswer: 'A',
+      },
+      {
+        id: 'sample-arab-2',
+        question: 'Tanda baca Tanwin Kasratain ("-in") ditunjukkan oleh nomor...',
+        options: {
+          A: '1. ً (Fathatain)',
+          B: '2. ٍ (Kasratain)',
+          C: '3. ٌ (Dhammatain)',
+          D: '4. ّ (Tasydid)',
+        },
+        correctAnswer: 'B',
+      },
+      {
+        id: 'sample-arab-3',
+        question: 'Huruf yang berharakat Dhommah terdapat pada nomor...',
+        options: {
+          A: '1. بَ',
+          B: '2. بِ',
+          C: '3. بُ',
+          D: '4. بْ',
+        },
+        correctAnswer: 'C',
+      },
+      {
+        id: 'sample-arab-4',
+        question: 'Tanda Sukun (mati) ditunjukkan oleh simbol nomor...',
+        options: {
+          A: '1. َ',
+          B: '2. ِ',
+          C: '3. ُ',
+          D: '4. ْ',
+        },
+        correctAnswer: 'D',
       },
     ],
   },

@@ -236,7 +236,7 @@ export const THEME_PRESETS: ThemePreset[] = [
     id: 'obsidian-gold',
     name: 'Obsidian Gold',
     tagline: 'Deep Onyx Velvet & Liquid Royal Gold',
-    badge: '👑 Owner',
+    badge: '♛ Owner',
     baseBgClass: 'bg-[#090602]',
     bgGradient: 'bg-gradient-to-br from-[#090602] via-[#1c1305] to-[#040201]',
     ambientOrbs: {
@@ -265,7 +265,7 @@ export const THEME_PRESETS: ThemePreset[] = [
     id: 'cyber-neon-cyan',
     name: 'Cyber Neon Cyan',
     tagline: 'Ultra Hyperdrive & High-Voltage Cyan Glow',
-    badge: '👑 Owner',
+    badge: '♛ Owner',
     baseBgClass: 'bg-[#010912]',
     bgGradient: 'bg-gradient-to-br from-[#010912] via-[#022238] to-[#00050a]',
     ambientOrbs: {
@@ -294,7 +294,7 @@ export const THEME_PRESETS: ThemePreset[] = [
     id: 'deep-purple-glow',
     name: 'Deep Purple Glow',
     tagline: 'Cosmic Singularity & Radiant Violet Aurora',
-    badge: '👑 Owner',
+    badge: '♛ Owner',
     baseBgClass: 'bg-[#080112]',
     bgGradient: 'bg-gradient-to-br from-[#080112] via-[#24043d] to-[#030008]',
     ambientOrbs: {
@@ -323,7 +323,7 @@ export const THEME_PRESETS: ThemePreset[] = [
     id: 'crimson-blood',
     name: 'Crimson Blood',
     tagline: 'Dark Vampire Blood Velvet & Molten Ruby Flame',
-    badge: '👑 Owner',
+    badge: '♛ Owner',
     baseBgClass: 'bg-[#0f0003]',
     bgGradient: 'bg-gradient-to-br from-[#0f0003] via-[#33020a] to-[#050001]',
     ambientOrbs: {

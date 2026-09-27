@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { LeaderboardEntry, UserProfile, TryoutHistoryItem, PvPHistoryItem, ThemeId } from '../types';
 import { ThemePreset, getThemePreset } from '../utils/themes';
-import { fetchGlobalLeaderboard, fetchUserProfile } from '../utils/api';
-import { OwnerBadge } from './OwnerBadge';
+import { fetchGlobalLeaderboard, fetchUserProfile, cleanDemoLeaderboardData } from '../utils/api';
+import { OwnerBadge, VipBadge } from './OwnerBadge';
 import { OwnerNameText } from './OwnerNameText';
 import {
   Trophy,
@@ -20,6 +20,8 @@ import {
   ChevronRight,
   ArrowLeft,
   Sparkles,
+  RefreshCw,
+  Trash2,
 } from 'lucide-react';
 import { UserAvatar } from './UserAvatar';
 
@@ -42,6 +44,8 @@ export const GlobalLeaderboardModal: React.FC<GlobalLeaderboardModalProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'pvp' | 'tryout'>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [isCleaning, setIsCleaning] = useState(false);
+  const [cleanNotice, setCleanNotice] = useState<string | null>(null);
 
   const currentTheme = theme || getThemePreset(themeId);
 
@@ -53,9 +57,7 @@ export const GlobalLeaderboardModal: React.FC<GlobalLeaderboardModalProps> = ({
   const [inspectTab, setInspectTab] = useState<'summary' | 'tryout' | 'pvp'>('summary');
   const [isInspectingLoading, setIsInspectingLoading] = useState(false);
 
-  useEffect(() => {
-    if (isOpen === false) return;
-
+  const loadLeaderboardData = () => {
     setIsLoading(true);
     fetchGlobalLeaderboard()
       .then((res) => {
@@ -64,7 +66,28 @@ export const GlobalLeaderboardModal: React.FC<GlobalLeaderboardModalProps> = ({
         }
       })
       .finally(() => setIsLoading(false));
+  };
+
+  useEffect(() => {
+    if (isOpen === false) return;
+    loadLeaderboardData();
   }, [isOpen]);
+
+  const handleCleanDemoData = async () => {
+    setIsCleaning(true);
+    try {
+      const res = await cleanDemoLeaderboardData();
+      if (res.success) {
+        setCleanNotice('Data demo leaderboard berhasil dibersihkan!');
+        loadLeaderboardData();
+        setTimeout(() => setCleanNotice(null), 3000);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setIsCleaning(false);
+    }
+  };
 
   const handleInspectUser = async (username: string) => {
     setSelectedUser(username);
@@ -134,13 +157,46 @@ export const GlobalLeaderboardModal: React.FC<GlobalLeaderboardModalProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {!selectedUser && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleCleanDemoData}
+                  disabled={isCleaning}
+                  className="px-2.5 py-1.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 border border-red-500/40 text-red-300 hover:text-red-200 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                  title="Hapus data akun & skor demo dari leaderboard"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                  <span className="hidden sm:inline">{isCleaning ? 'Membersihkan...' : 'Hapus Data Demo'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={loadLeaderboardData}
+                  disabled={isLoading}
+                  className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                  title="Muat Ulang Data Leaderboard"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-cyan-400' : ''}`} />
+                </button>
+              </>
+            )}
+
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
+
+        {cleanNotice && (
+          <div className="bg-emerald-950/90 border-b border-emerald-500/40 text-emerald-300 text-xs font-bold py-1.5 px-4 text-center animate-fadeIn">
+            {cleanNotice}
+          </div>
+        )}
 
         {/* Modal Body */}
         {selectedUser ? (
@@ -180,14 +236,16 @@ export const GlobalLeaderboardModal: React.FC<GlobalLeaderboardModalProps> = ({
                           animation={inspectProfile.ownerNameAnimation}
                           className="text-lg font-black"
                         />
-                        {inspectProfile.isOwner && (
+                        {inspectProfile.isOwner ? (
                           <OwnerBadge
                             badgeId={inspectProfile.activeBadgeId}
                             isOwner={true}
                             size="sm"
                             showLabel
                           />
-                        )}
+                        ) : inspectProfile.isVip ? (
+                          <VipBadge size="sm" showLabel />
+                        ) : null}
                       </div>
                       <p className="text-xs font-mono text-purple-300">@{inspectProfile.username}</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
@@ -453,25 +511,23 @@ export const GlobalLeaderboardModal: React.FC<GlobalLeaderboardModalProps> = ({
                   <div className="w-6 h-6 rounded-full bg-slate-700 text-slate-200 text-xs font-black flex items-center justify-center mb-1">
                     2
                   </div>
-                  <div className="my-1 relative">
+                  <div className="my-1">
                     <UserAvatar avatar={top3[1].avatar} size="md" />
-                    {top3[1].isOwner && (
-                      <div className="absolute -bottom-1 -right-1">
-                        <OwnerBadge isOwner={true} badgeId={top3[1].activeBadgeId} size="xs" glow />
-                      </div>
-                    )}
                   </div>
                   <div className="flex items-center justify-center gap-1 max-w-full flex-wrap">
                     <OwnerNameText
                       name={top3[1].displayName}
                       isOwner={top3[1].isOwner}
+                      isVip={top3[1].isVip}
                       effect={top3[1].ownerNameEffect}
                       animation={top3[1].ownerNameAnimation}
                       className="text-xs font-bold truncate max-w-full"
                     />
-                    {top3[1].isOwner && (
+                    {top3[1].isOwner ? (
                       <OwnerBadge isOwner={true} badgeId={top3[1].activeBadgeId} size="xs" showLabel />
-                    )}
+                    ) : top3[1].isVip ? (
+                      <VipBadge size="xs" showLabel />
+                    ) : null}
                   </div>
                   <p className="text-[10px] text-purple-300 font-mono">@{top3[1].username}</p>
                   <span className="text-xs font-black text-cyan-400 mt-1">
@@ -492,25 +548,23 @@ export const GlobalLeaderboardModal: React.FC<GlobalLeaderboardModalProps> = ({
                   <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-950 text-xs font-black flex items-center justify-center mb-1 shadow">
                     1
                   </div>
-                  <div className="my-1 relative">
+                  <div className="my-1">
                     <UserAvatar avatar={top3[0].avatar} size="lg" />
-                    {top3[0].isOwner && (
-                      <div className="absolute -bottom-1.5 -right-1.5">
-                        <OwnerBadge isOwner={true} badgeId={top3[0].activeBadgeId} size="sm" glow />
-                      </div>
-                    )}
                   </div>
                   <div className="flex items-center justify-center gap-1 max-w-full flex-wrap">
                     <OwnerNameText
                       name={top3[0].displayName}
                       isOwner={top3[0].isOwner}
+                      isVip={top3[0].isVip}
                       effect={top3[0].ownerNameEffect}
                       animation={top3[0].ownerNameAnimation}
                       className="text-xs sm:text-sm font-black truncate max-w-full"
                     />
-                    {top3[0].isOwner && (
+                    {top3[0].isOwner ? (
                       <OwnerBadge isOwner={true} badgeId={top3[0].activeBadgeId} size="xs" showLabel />
-                    )}
+                    ) : top3[0].isVip ? (
+                      <VipBadge size="xs" showLabel />
+                    ) : null}
                   </div>
                   <p className="text-[10px] text-amber-300 font-mono">@{top3[0].username}</p>
                   <span className="text-sm sm:text-base font-black text-amber-400 mt-1">
@@ -530,25 +584,23 @@ export const GlobalLeaderboardModal: React.FC<GlobalLeaderboardModalProps> = ({
                   <div className="w-6 h-6 rounded-full bg-amber-700 text-amber-100 text-xs font-black flex items-center justify-center mb-1">
                     3
                   </div>
-                  <div className="my-1 relative">
+                  <div className="my-1">
                     <UserAvatar avatar={top3[2].avatar} size="md" />
-                    {top3[2].isOwner && (
-                      <div className="absolute -bottom-1 -right-1">
-                        <OwnerBadge isOwner={true} badgeId={top3[2].activeBadgeId} size="xs" glow />
-                      </div>
-                    )}
                   </div>
                   <div className="flex items-center justify-center gap-1 max-w-full flex-wrap">
                     <OwnerNameText
                       name={top3[2].displayName}
                       isOwner={top3[2].isOwner}
+                      isVip={top3[2].isVip}
                       effect={top3[2].ownerNameEffect}
                       animation={top3[2].ownerNameAnimation}
                       className="text-xs font-bold truncate max-w-full"
                     />
-                    {top3[2].isOwner && (
+                    {top3[2].isOwner ? (
                       <OwnerBadge isOwner={true} badgeId={top3[2].activeBadgeId} size="xs" showLabel />
-                    )}
+                    ) : top3[2].isVip ? (
+                      <VipBadge size="xs" showLabel />
+                    ) : null}
                   </div>
                   <p className="text-[10px] text-purple-300 font-mono">@{top3[2].username}</p>
                   <span className="text-xs font-black text-cyan-400 mt-1">
@@ -616,18 +668,21 @@ export const GlobalLeaderboardModal: React.FC<GlobalLeaderboardModalProps> = ({
                             <OwnerNameText
                               name={player.displayName}
                               isOwner={player.isOwner}
+                              isVip={player.isVip}
                               effect={player.ownerNameEffect}
                               animation={player.ownerNameAnimation}
                               className="text-xs sm:text-sm font-bold truncate max-w-[140px] sm:max-w-xs"
                             />
-                            {player.isOwner && (
+                            {player.isOwner ? (
                               <OwnerBadge
                                 isOwner={true}
                                 badgeId={player.activeBadgeId}
                                 size="xs"
                                 showLabel
                               />
-                            )}
+                            ) : player.isVip ? (
+                              <VipBadge size="xs" showLabel />
+                            ) : null}
                             {isCurrent && (
                               <span className={`px-1.5 py-0.2 rounded bg-gradient-to-r ${currentTheme.actionBtnGradient} text-[9px] font-bold text-white uppercase`}>
                                 Anda

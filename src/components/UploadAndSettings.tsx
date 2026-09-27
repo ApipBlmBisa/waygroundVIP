@@ -53,13 +53,11 @@ export const UploadAndSettings: React.FC<UploadAndSettingsProps> = ({
   onLockNow,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const bgInputRef = useRef<HTMLInputElement>(null);
 
   const [activeTab, setActiveTab] = useState<'upload' | 'history' | 'presets'>('upload');
   const [isDragging, setIsDragging] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   // Local settings edit state
   const [localSettings, setLocalSettings] = useState<QuizSettings>(settings);
@@ -120,24 +118,6 @@ export const UploadAndSettings: React.FC<UploadAndSettingsProps> = ({
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       processFile(e.dataTransfer.files[0]);
     }
-  };
-
-  // Custom Background Image Upload
-  const handleBgImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          handleSettingChange('bgImageUrl', event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removeBgImage = () => {
-    handleSettingChange('bgImageUrl', null);
   };
 
   return (
@@ -271,44 +251,47 @@ export const UploadAndSettings: React.FC<UploadAndSettingsProps> = ({
       </div>
 
       {/* Main Mode Tabs */}
-      <div className="flex border-b border-slate-800 gap-2">
+      <div className="flex border-b border-slate-800 gap-1 sm:gap-2 overflow-x-auto no-scrollbar">
         <button
           id="tab-upload"
           onClick={() => setActiveTab('upload')}
-          className={`flex items-center gap-2 pb-3 px-4 font-bold text-sm transition-all border-b-2 cursor-pointer ${
+          style={{ borderBottomColor: activeTab === 'upload' ? currentTheme.accentColor : 'transparent' }}
+          className={`flex items-center gap-1.5 pb-2.5 sm:pb-3 px-2.5 sm:px-4 font-bold text-xs sm:text-sm transition-all border-b-2 shrink-0 cursor-pointer ${
             activeTab === 'upload'
-              ? `${currentTheme.accentBorderClass.replace('/40', '')} ${currentTheme.accentClass}`
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? currentTheme.accentClass
+              : 'text-slate-400 hover:text-slate-200'
           }`}
         >
-          <UploadCloud className="w-4 h-4" />
-          <span>Upload File Excel (.xlsx / .csv)</span>
+          <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <span>Upload File Excel</span>
         </button>
 
         <button
           id="tab-history"
           onClick={() => setActiveTab('history')}
-          className={`flex items-center gap-2 pb-3 px-4 font-bold text-sm transition-all border-b-2 cursor-pointer ${
+          style={{ borderBottomColor: activeTab === 'history' ? currentTheme.accentColor : 'transparent' }}
+          className={`flex items-center gap-1.5 pb-2.5 sm:pb-3 px-2.5 sm:px-4 font-bold text-xs sm:text-sm transition-all border-b-2 shrink-0 cursor-pointer ${
             activeTab === 'history'
-              ? `${currentTheme.accentBorderClass.replace('/40', '')} ${currentTheme.accentClass}`
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? currentTheme.accentClass
+              : 'text-slate-400 hover:text-slate-200'
           }`}
         >
-          <History className="w-4 h-4" />
-          <span>Riwayat File ({savedQuizzes.length})</span>
+          <History className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <span>Riwayat ({savedQuizzes.length})</span>
         </button>
 
         <button
           id="tab-presets"
           onClick={() => setActiveTab('presets')}
-          className={`flex items-center gap-2 pb-3 px-4 font-bold text-sm transition-all border-b-2 cursor-pointer ${
+          style={{ borderBottomColor: activeTab === 'presets' ? currentTheme.accentColor : 'transparent' }}
+          className={`flex items-center gap-1.5 pb-2.5 sm:pb-3 px-2.5 sm:px-4 font-bold text-xs sm:text-sm transition-all border-b-2 shrink-0 cursor-pointer ${
             activeTab === 'presets'
-              ? `${currentTheme.accentBorderClass.replace('/40', '')} ${currentTheme.accentClass}`
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? currentTheme.accentClass
+              : 'text-slate-400 hover:text-slate-200'
           }`}
         >
-          <Layers className="w-4 h-4" />
-          <span>Soal Preset / Contoh</span>
+          <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <span>Contoh Soal</span>
         </button>
       </div>
 
@@ -562,352 +545,6 @@ export const UploadAndSettings: React.FC<UploadAndSettingsProps> = ({
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* THEME & BACKGROUND MODAL                                    */}
-      {/* ========================================================= */}
-      {showSettingsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="glass-card rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-white/20 shadow-2xl relative">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Settings2 className="w-5 h-5 text-purple-400" />
-                Pengaturan Visual & Tema
-              </h3>
-              <button
-                onClick={() => setShowSettingsModal(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors cursor-pointer"
-                title="Tutup Pengaturan"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="py-5 space-y-5">
-              {/* Randomization Modes (Soal & Opsi) */}
-              <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-purple-500/30 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase tracking-wider text-purple-300 flex items-center gap-1.5">
-                    <Dices className="w-4 h-4 text-purple-400" />
-                    Pengacakan Soal & Pilihan Jawaban
-                  </label>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                    Anti-Ketebak
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {/* Toggle Shuffle Questions */}
-                  <button
-                    type="button"
-                    onClick={() => handleSettingChange('shuffleQuestions', !localSettings.shuffleQuestions)}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-2.5 ${
-                      localSettings.shuffleQuestions
-                        ? 'bg-purple-950/40 border-purple-500/50 shadow-sm'
-                        : 'bg-slate-950/60 border-slate-800 opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
-                        localSettings.shuffleQuestions
-                          ? 'bg-purple-500 text-white shadow-sm'
-                          : 'bg-slate-800 text-slate-500 border border-slate-700'
-                      }`}
-                    >
-                      {localSettings.shuffleQuestions ? '✓' : ''}
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-white block">Acak Urutan Soal</span>
-                      <span className="text-[11px] text-slate-400 leading-tight block mt-0.5">
-                        Urutan soal dikocok acak penuh (derangement) sehingga nomor soal tidak bisa dihafal.
-                      </span>
-                    </div>
-                  </button>
-
-                  {/* Toggle Shuffle Options */}
-                  <button
-                    type="button"
-                    onClick={() => handleSettingChange('shuffleOptions', !localSettings.shuffleOptions)}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-2.5 ${
-                      localSettings.shuffleOptions
-                        ? 'bg-purple-950/40 border-purple-500/50 shadow-sm'
-                        : 'bg-slate-950/60 border-slate-800 opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
-                        localSettings.shuffleOptions
-                          ? 'bg-purple-500 text-white shadow-sm'
-                          : 'bg-slate-800 text-slate-500 border border-slate-700'
-                      }`}
-                    >
-                      {localSettings.shuffleOptions ? '✓' : ''}
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-white block">Acak Pilihan Opsi (A, B, C, D)</span>
-                      <span className="text-[11px] text-slate-400 leading-tight block mt-0.5">
-                        Distribusi kunci bervariasi seimbang di A, B, C, D dan tidak pernah kembar berturut-turut.
-                      </span>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Timer Flow Settings */}
-              <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
-                <label className="text-xs font-bold uppercase tracking-wider text-purple-300 block flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-purple-400" />
-                  Pengaturan Waktu Alur Kuis (Timer)
-                </label>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {/* Read Timer */}
-                  <div className="p-2.5 rounded-xl bg-slate-950/70 border border-cyan-500/30 space-y-1">
-                    <span className="text-[11px] font-semibold text-cyan-300 block">1. Jeda Baca Soal</span>
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="number"
-                        min="1"
-                        max="30"
-                        value={localSettings.readQuestionTimer}
-                        onChange={(e) => handleSettingChange('readQuestionTimer', Math.max(1, parseInt(e.target.value) || 3))}
-                        className="w-full bg-slate-800 text-white font-bold text-center py-1 rounded border border-slate-600 focus:outline-none focus:border-cyan-400 text-sm"
-                      />
-                      <span className="text-xs text-slate-400">dtk</span>
-                    </div>
-                    <span className="text-[10px] text-slate-400 leading-tight block">Waktu baca sebelum opsi muncul</span>
-                  </div>
-
-                  {/* Question Timer */}
-                  <div className="p-2.5 rounded-xl bg-slate-950/70 border border-indigo-500/30 space-y-1">
-                    <span className="text-[11px] font-semibold text-indigo-300 block">2. Waktu Jawab</span>
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="number"
-                        min="2"
-                        max="60"
-                        value={localSettings.questionTimer}
-                        onChange={(e) => handleSettingChange('questionTimer', Math.max(1, parseInt(e.target.value) || 5))}
-                        className="w-full bg-slate-800 text-white font-bold text-center py-1 rounded border border-slate-600 focus:outline-none focus:border-indigo-400 text-sm"
-                      />
-                      <span className="text-xs text-slate-400">dtk</span>
-                    </div>
-                    <span className="text-[10px] text-slate-400 leading-tight block">Waktu memilih opsi A, B, C, D</span>
-                  </div>
-
-                  {/* Answer Timer */}
-                  <div className="p-2.5 rounded-xl bg-slate-950/70 border border-emerald-500/30 space-y-1">
-                    <span className="text-[11px] font-semibold text-emerald-300 block">3. Tinjau Kunci</span>
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="number"
-                        min="1"
-                        max="30"
-                        value={localSettings.answerTimer}
-                        onChange={(e) => handleSettingChange('answerTimer', Math.max(1, parseInt(e.target.value) || 3))}
-                        className="w-full bg-slate-800 text-white font-bold text-center py-1 rounded border border-slate-600 focus:outline-none focus:border-emerald-400 text-sm"
-                      />
-                      <span className="text-xs text-slate-400">dtk</span>
-                    </div>
-                    <span className="text-[10px] text-slate-400 leading-tight block">Waktu tampilan sisi belakang</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Background Image Upload */}
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-300 block mb-2">
-                  Custom Background Image
-                </label>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => bgInputRef.current?.click()}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-white transition-all cursor-pointer"
-                  >
-                    <ImageIcon className="w-4 h-4 text-purple-400" />
-                    <span>Pilih Gambar Latar</span>
-                  </button>
-
-                  <input
-                    type="file"
-                    ref={bgInputRef}
-                    onChange={handleBgImageUpload}
-                    accept="image/*"
-                    className="hidden"
-                  />
-
-                  {localSettings.bgImageUrl && (
-                    <button
-                      onClick={removeBgImage}
-                      className="text-xs text-rose-400 hover:underline font-semibold"
-                    >
-                      Hapus Gambar (Gunakan Gradasi Standar)
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Blur Level Slider */}
-              {localSettings.bgImageUrl && (
-                <div>
-                  <div className="flex justify-between text-xs font-semibold text-slate-300 mb-1">
-                    <span>Lapisan Blur Background</span>
-                    <span>{localSettings.bgBlur}px</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="20"
-                    value={localSettings.bgBlur}
-                    onChange={(e) => handleSettingChange('bgBlur', parseInt(e.target.value))}
-                    className="w-full accent-purple-500 cursor-pointer"
-                  />
-                </div>
-              )}
-
-              {/* Dimmer / Darkness Overlay Slider */}
-              {localSettings.bgImageUrl && (
-                <div>
-                  <div className="flex justify-between text-xs font-semibold text-slate-300 mb-1">
-                    <span>Lapisan Dimmer Gelap (Overlay)</span>
-                    <span>{localSettings.bgOpacity}%</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="20"
-                    max="95"
-                    value={localSettings.bgOpacity}
-                    onChange={(e) => handleSettingChange('bgOpacity', parseInt(e.target.value))}
-                    className="w-full accent-purple-500 cursor-pointer"
-                  />
-                </div>
-              )}
-
-              {/* Preset Background Color Themes */}
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-300 block mb-2 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <Palette className="w-3.5 h-3.5 text-purple-400" />
-                    Pilihan Tema Warna Kuis
-                  </span>
-                  <span className="text-[11px] text-purple-300 font-normal">
-                    Tema Aktif: <strong className="text-white">{currentTheme.name}</strong>
-                  </span>
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
-                  {THEME_PRESETS.map((t) => {
-                    const isSelected = (localSettings.themeId || 'cyber-purple') === t.id;
-                    return (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => handleSettingChange('themeId', t.id)}
-                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                          isSelected
-                            ? `${t.cardBorderHighlight} bg-white/10 shadow-md ring-1 ring-white/30`
-                            : 'border-slate-800 bg-slate-950/70 hover:bg-slate-800/80 hover:border-slate-700'
-                        }`}
-                      >
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-xs text-white">
-                              {t.name}
-                            </span>
-                            <span className={`text-[9px] px-1 py-0.2 rounded border font-mono ${t.badgeBgClass}`}>
-                              {t.badge}
-                            </span>
-                          </div>
-                          <span className="text-[10px] text-slate-400 block">
-                            {t.tagline}
-                          </span>
-                        </div>
-
-                        {/* Swatches & Indicator */}
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <div className="flex -space-x-1">
-                            {t.previewColors.map((color, idx) => (
-                              <div
-                                key={idx}
-                                className="w-3.5 h-3.5 rounded-full border border-black/40 shadow-sm"
-                                style={{ backgroundColor: color }}
-                              />
-                            ))}
-                          </div>
-                          {isSelected && (
-                            <div className="w-4 h-4 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-sm ml-1">
-                              <Check className="w-2.5 h-2.5 stroke-[3]" />
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Security Web Password Setting Block */}
-              {onOpenSecuritySettings && (
-                <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-emerald-500/30 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
-                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                      Proteksi Kata Sandi Web (Level Koding)
-                    </span>
-                    <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                        isProtectionActive()
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                          : 'bg-slate-800 text-slate-400 border border-slate-700'
-                      }`}
-                    >
-                      {isProtectionActive() ? 'Terproteksi' : 'Nonaktif'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300">
-                    Kata sandi diatur langsung di file koding (<code className="text-cyan-300">src/security.config.ts</code>) agar tidak dapat dibajak atau di-reset oleh pengunjung web.
-                  </p>
-                  <div className="pt-1 flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowSettingsModal(false);
-                        onOpenSecuritySettings();
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
-                    >
-                      <KeyRound className="w-3.5 h-3.5" />
-                      <span>Lihat Info & Panduan Koding</span>
-                    </button>
-                    {onLockNow && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowSettingsModal(false);
-                          onLockNow();
-                        }}
-                        className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
-                      >
-                        <Lock className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Kunci Sekarang</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="pt-3 border-t border-slate-800 flex justify-end">
-              <button
-                onClick={() => setShowSettingsModal(false)}
-                className={`flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-r ${currentTheme.actionBtnGradient} hover:brightness-110 text-white text-sm font-bold shadow-md cursor-pointer`}
-              >
-                <Check className="w-4 h-4" />
-                <span>Simpan & Tutup</span>
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>
